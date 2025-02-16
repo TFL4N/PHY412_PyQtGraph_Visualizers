@@ -1,0 +1,9 @@
+name: opengl_viz
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.7 
+  - pyqt=5               
+  - pyqtgraph           
+  - pyopengl
+  
