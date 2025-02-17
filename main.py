@@ -44,6 +44,7 @@ class Widget(QWidget):
         axes = myGLAxisItem()
         axes.setSize(x=5, y=5, z=5)
         axes.lineplot.setData(width=5.0)
+        axes.rotate(-90,0,1,0)
         self.canvas.addItem(axes)
 
         cnt = 50
@@ -51,21 +52,29 @@ class Widget(QWidget):
         data[:,2] = np.linspace(0,5,cnt)
         data[:,0] = np.cos(data[:,2])
         
-        graph = gl.GLLinePlotItem(pos=data,
+        graph = gl.GLLinePlotItem(parentItem=axes,
+                                  pos=data,
                                   color=[1.0,1.0,1.0,1.0],
                                   width=5.0,
                                   antialias=True,
                                   mode='line_strip')
         self.canvas.addItem(graph)
+        
+        ########################
+
+        vec = myVectorItem(parentItem=axes,
+                           end=[5.0,5.0,5.0])
+
+        self.canvas.addItem(vec)
 
         
+        ########################
         opts_layout = QGridLayout()
 
         l = QLabel("Highlight on Mouse Hover")
-        
-        w = QCheckBox()
-        # w.setChecked(self.ewaldview.getHighlightOnHover())
-        # w.stateChanged.connect(self.handleHighlightOnHoverPress)
+
+        w = QPushButton("Save Image")
+        w.clicked.connect(self.handleSaveImagePress)
 
         opts_layout.addWidget(l, 0, 0)
         opts_layout.addWidget(w, 0, 1)
@@ -77,7 +86,8 @@ class Widget(QWidget):
         
         self.setLayout(main_layout)
 
-
+    def handleSaveImagePress(self, state):
+        self.canvas.grabFramebuffer().save('images/fileName.png')
 
 ## build a QApplication before building other widgets
 app = pg.mkQApp()
