@@ -8,7 +8,8 @@ import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from pyqtgraph.Qt.QtCore import (
     QTimer,
-    QObject
+    QObject,
+    Qt
     )
 from pyqtgraph.Qt.QtWidgets import (
     QApplication,
@@ -19,6 +20,7 @@ from pyqtgraph.Qt.QtWidgets import (
     QSplitter,
     QGridLayout,
     QLabel,
+    QSlider,
     QSpinBox,
     QCheckBox,
     QComboBox,
@@ -71,7 +73,14 @@ class BaseWidget(QWidget):
         # gl view
         self.canvas = gl.GLViewWidget()
         self.canvas.show()
+        
+        # canvas items
+        self.timer = None
+        self.frame = 0
+        self.freq = 0.5
+        self.phase_diff = 0.0
 
+        
         # menu options
         opts_layout = QGridLayout()
 
@@ -92,17 +101,33 @@ class BaseWidget(QWidget):
         opts_layout.addWidget(l, 1, 0)
         opts_layout.addWidget(w, 1, 1)
 
+
+        l = QLabel("Debug Action")
+
+        w = QPushButton("Action")
+        w.clicked.connect(self.handleDebugActionPress)
+
+        opts_layout.addWidget(l, 2, 0)
+        opts_layout.addWidget(w, 2, 1)
+
+        
+        l = QLabel("Frequency")
+
+        w = QSlider(Qt.Horizontal)
+        w.setValue(0)
+        w.setMinimum(0)
+        w.setMaximum(1000)
+        w.valueChanged.connect(self.handleFreqChange)
+
+        opts_layout.addWidget(l, 3, 0)
+        opts_layout.addWidget(w, 3, 1)
+
         
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.canvas)
         main_layout.addLayout(opts_layout)
         
         self.setLayout(main_layout)
-
-        # canvas items
-        self.cur_t = 0.0
-        self.timer = None
-        self.frame = 0
         
         # start
         self.setupScene()
@@ -120,6 +145,17 @@ class BaseWidget(QWidget):
         self.canvas.grabFramebuffer().save(f'video/take_1/frame_{self.frame}.png')
         self.frame += 1
 
+    def buildAxes(self):
+        self.axes = myGLAxisItem()
+        self.axes.setSize(x=5, y=5, z=5)
+        self.axes.rotate(-90,0,1,0)
+        self.canvas.addItem(self.axes)
+
+        pad = 0.25
+        x_label = gl.GLTextItem(parentItem=self.axes, pos=[5.0+pad,0.0,0.0], text="x")
+        y_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,5.0+pad,0.0], text="y")
+        z_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,0.0,5.0+pad], text="z")
+        
     def startAnimating(self):
         self.stopAnimating()
 
@@ -133,16 +169,7 @@ class BaseWidget(QWidget):
         
     def playAnimation(self, duration):
         print('playAnimation()')
-        # for t in np.arange(0,duration,0.3):
-        #     self.updateScene(t)
-        #     time.sleep(0.3)
-
         
-        # self.timer = QTimer()
-        # self.timer.setInterval(100)
-        # self.timer.timeout.connect(self.handleAnimationTimer)
-        # self.timer.start()  # Update every 50 ms
-
         
     def handleSaveImagePress(self, state):
         self.canvas.grabFramebuffer().save('images/fileName.png')
@@ -150,44 +177,30 @@ class BaseWidget(QWidget):
     def handlePlayAnimationPress(self, state):
         self.playAnimation(10)
 
+    def handleDebugActionPress(self, state):
+        print(self.canvas.cameraPosition())
+
+    def handleFreqChange(self, val):
+        min_freq = 0.5
+        max_freq = 5.0
+        val = float(val)/1000
+        val *= max_freq - min_freq
+        val += min_freq
+        self.freq = val
 
 class Part1_Widget(BaseWidget):
-    def setupScene(self):
-        ## axis
-        self.axes = myGLAxisItem()
-        self.axes.setSize(x=5, y=5, z=5)
-        self.axes.rotate(-90,0,1,0)
-        self.canvas.addItem(self.axes)
+    def setupScene(self):        
+        self.buildAxes()
 
-        self.graph = gl.GLLinePlotItem(parentItem=self.axes,
-                                       pos=[0.0,0.0,0.0],
-                                       color=[1.0,1.0,1.0,1.0],
-                                       width=5.0,
-                                       antialias=True,
-                                       mode='line_strip')
-
-        pad = 0.25
-        x_label = gl.GLTextItem(parentItem=self.axes, pos=[5.0+pad,0.0,0.0], text="x")
-        y_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,5.0+pad,0.0], text="y")
-        z_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,0.0,5.0+pad], text="z")
+        self.e_vec = myVectorItem(parentItem=self.axes,
+                                  color=[1,0,0,1],
+                                  end=[5.0,0.0,0.0])
+        self.e_vec.setDepthValue(5)
         
     def updateScene(self, t):
-        duration = 10.0
-        t = t % duration
+        x = 5.0 * np.cos(self.freq*t)
 
-        ts = np.arange(0,t+0.25,0.25)
-        data = np.zeros((ts.size,3))
-        data[:,2] = ts
-        data[:,0] = np.cos(data[:,2])
-
-        self.graph.setData(pos=data)
-        
-        ########################
-        
-        # vec = myVectorItem(parentItem=axes,
-        #                    end=[5.0,5.0,5.0])
-
-        # self.canvas.addItem(vec)
+        self.e_vec.setPosition(end=[x,0.0,0.0])
 
         
 class Part2_Widget(BaseWidget):

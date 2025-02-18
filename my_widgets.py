@@ -57,16 +57,18 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.width = width
         self.tip_height = 1.0
         self.tip_radius = 0.5
+        self.color = color
 
         
         self.lineplot = gl.GLLinePlotItem(
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
         )
+        self.lineplot.setData(width=5.0)
 
         cone_md = generate_cone(radius=self.tip_radius, height=self.tip_height, segments=8)
         self.tip_mesh = gl.GLMeshItem(parentItem=self,
                                       meshdata=cone_md,
-                                      color=np.array([0,1,1,1], dtype=float),
+                                      color=np.array(color, dtype=float),
                                       smooth=False,
                                       computeNormals=False,
                                       glOptions='opaque')
@@ -75,14 +77,20 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.setParentItem(parentItem)
         self.updateLines()
 
+    def setPosition(self, start=[0.0,0.0,0.0], end=[1.0,1.0,1.0]):
+        self.start = np.array(start)
+        self.end = np.array(end)
+        self.updateLines()
+        
+        
     def updateLines(self):
         if self.lineplot == None:
             return
 
         pos = np.array([self.start, self.end])
-        color=[1.0,1.0,1.0,1.0]
-        self.lineplot.setData(pos=pos, color=color)
+        self.lineplot.setData(pos=pos, color=self.color)
 
+        self.tip_mesh.setColor(self.color)
         self.tip_mesh.resetTransform()
         self.tip_mesh.translate(0,0,-self.tip_height)
 
@@ -128,7 +136,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.lineplot = gl.GLLinePlotItem(
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
         )
-        self.lineplot.setData(width=5.0)
+        self.lineplot.setData(width=3.0)
         
         self.x_major_plot = gl.GLLinePlotItem(
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
