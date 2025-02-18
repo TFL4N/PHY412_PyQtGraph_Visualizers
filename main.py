@@ -32,7 +32,8 @@ from pyqtgraph.Qt.QtWidgets import (
 
 
 class MyTimer(QObject):
-    def __init__(self, duration=10000, interval=100, block=None):
+    'Time units are milliseconds; block is a function type'
+    def __init__(self, duration=None, interval=100, block=None):
         super().__init__()
 
         self.duration = duration
@@ -48,18 +49,20 @@ class MyTimer(QObject):
         self.timer.start()
 
     def on_timeout(self):
-        if self.counter >= self.duration:
+        if self.duration is not None \
+           and self.counter >= self.duration:
             self.timer.stop()
-            
+
+        # call function block with float t in seconds
         if self.block is not None:
             self.block(float(self.counter) / 1000)
             
         self.counter += self.interval
+
+
         
-        
-class Widget(QWidget):
-    '''Contains the main window and root layout'''
-    def __init__(self):
+class BaseWidget(QWidget):
+    def __init__(self, autostart=True):
         super().__init__()
 
         self.setWindowTitle("Ewald Sphere Popout")
@@ -98,15 +101,96 @@ class Widget(QWidget):
 
         # canvas items
         self.cur_t = 0.0
-        self.axes = None
-        self.graph = None
         self.timer = None
         self.frame = 0
         
         # start
         self.setupScene()
+        if autostart:
+            self.startAnimating()
+
+    def setupScene(self):
+        pass
+    
+    def updateScene(self, t):
+        pass
+        
+    def updateAndRenderScene(self, t):
+        self.updateScene(t)
+        self.canvas.grabFramebuffer().save(f'video/take_1/frame_{self.frame}.png')
+        self.frame += 1
+
+    def startAnimating(self):
+        self.stopAnimating()
+
+        self.timer = MyTimer(block=self.updateAndRenderScene)
+        self.timer.start_timer()
+
+    def stopAnimating(self):
+        if self.timer is not None:
+            self.timer.stop()
+            self.timer = None
+        
+    def playAnimation(self, duration):
+        print('playAnimation()')
+        # for t in np.arange(0,duration,0.3):
+        #     self.updateScene(t)
+        #     time.sleep(0.3)
 
         
+        # self.timer = QTimer()
+        # self.timer.setInterval(100)
+        # self.timer.timeout.connect(self.handleAnimationTimer)
+        # self.timer.start()  # Update every 50 ms
+
+        
+    def handleSaveImagePress(self, state):
+        self.canvas.grabFramebuffer().save('images/fileName.png')
+
+    def handlePlayAnimationPress(self, state):
+        self.playAnimation(10)
+
+
+class Part1_Widget(BaseWidget):
+    def setupScene(self):
+        ## axis
+        self.axes = myGLAxisItem()
+        self.axes.setSize(x=5, y=5, z=5)
+        self.axes.rotate(-90,0,1,0)
+        self.canvas.addItem(self.axes)
+
+        self.graph = gl.GLLinePlotItem(parentItem=self.axes,
+                                       pos=[0.0,0.0,0.0],
+                                       color=[1.0,1.0,1.0,1.0],
+                                       width=5.0,
+                                       antialias=True,
+                                       mode='line_strip')
+
+        pad = 0.25
+        x_label = gl.GLTextItem(parentItem=self.axes, pos=[5.0+pad,0.0,0.0], text="x")
+        y_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,5.0+pad,0.0], text="y")
+        z_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,0.0,5.0+pad], text="z")
+        
+    def updateScene(self, t):
+        duration = 10.0
+        t = t % duration
+
+        ts = np.arange(0,t+0.25,0.25)
+        data = np.zeros((ts.size,3))
+        data[:,2] = ts
+        data[:,0] = np.cos(data[:,2])
+
+        self.graph.setData(pos=data)
+        
+        ########################
+        
+        # vec = myVectorItem(parentItem=axes,
+        #                    end=[5.0,5.0,5.0])
+
+        # self.canvas.addItem(vec)
+
+        
+class Part2_Widget(BaseWidget):
     def setupScene(self):
         ## axis
         self.axes = myGLAxisItem()
@@ -121,13 +205,12 @@ class Widget(QWidget):
                                        width=5.0,
                                        antialias=True,
                                        mode='line_strip')
-        self.canvas.addItem(self.graph)
-
-    def handleAnimationTimer(self):
-        self.updateScene(self.cur_t)
-        self.cur_t += 0.1
+        #self.canvas.addItem(self.graph)
 
     def updateScene(self, t):
+        duration = 10.0
+        t = t % duration
+
         ts = np.arange(0,t+0.25,0.25)
         data = np.zeros((ts.size,3))
         data[:,2] = ts
@@ -138,44 +221,18 @@ class Widget(QWidget):
         ########################
 
         text = gl.GLTextItem(parentItem=self.axes, pos=[0.0,0.0,0.0], text="Origin")
-        self.canvas.addItem(text)
+        #self.canvas.addItem(text)
         
         # vec = myVectorItem(parentItem=axes,
         #                    end=[5.0,5.0,5.0])
 
         # self.canvas.addItem(vec)
-        
-    def updateAndRenderScene(self, t):
-        
-        self.updateScene(t)
-        self.canvas.grabFramebuffer().save(f'video/take_1/frame_{self.frame}.png')
-        self.frame += 1
-        
-        
-    def playAnimation(self, duration):
-        print('playAnimation()')
-        # for t in np.arange(0,duration,0.3):
-        #     self.updateScene(t)
-        #     time.sleep(0.3)
 
-        self.timer = MyTimer(block=self.updateAndRenderScene)
-        self.timer.start_timer()
-        
-        # self.timer = QTimer()
-        # self.timer.setInterval(100)
-        # self.timer.timeout.connect(self.handleAnimationTimer)
-        # self.timer.start()  # Update every 50 ms
-        
-    def handleSaveImagePress(self, state):
-        self.canvas.grabFramebuffer().save('images/fileName.png')
-
-    def handlePlayAnimationPress(self, state):
-        self.playAnimation(10)
         
 ## build a QApplication before building other widgets
 app = pg.mkQApp()
 
-w = Widget()
+w = Part1_Widget()
 w.show()
 
 

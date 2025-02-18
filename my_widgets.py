@@ -112,36 +112,44 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
     
     """
     
-    def __init__(self, size=None, antialias=True, glOptions='translucent', parentItem=None):
+    def __init__(self, x=5.0, y=5.0, z=5.0, x_color=[1,1,1,1], y_color=[1,1,1,1], z_color=[1,1,1,1], antialias=True, glOptions='translucent', parentItem=None):
         super().__init__()
 
         self.lineplot = None    # mark that we are still initializing
         self.x_major_plot = None
-        
-        if size is None:
-            size = QtGui.QVector3D(1,1,1)
-        self.setSize(size=size)
+        self.y_major_plot = None
+        self.z_major_plot = None
+
+        self.x_color = x_color
+        self.y_color = y_color
+        self.z_color = z_color
+        self.setSize(x,y,z)
 
         self.lineplot = gl.GLLinePlotItem(
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
         )
-
+        self.lineplot.setData(width=5.0)
+        
         self.x_major_plot = gl.GLLinePlotItem(
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
         )
+        self.y_major_plot = gl.GLLinePlotItem(
+            parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
+        )
+        self.z_major_plot = gl.GLLinePlotItem(
+            parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
+        )
+        
+       # x_text = gl.GLTextItem(parentItem=self, pos=[self.size()[0],0.0,0.0], text="x")
+
         
         self.setParentItem(parentItem)
         self.updateLines()
 
-    def setSize(self, x=None, y=None, z=None, size=None):
+    def setSize(self, x=0.0, y=0.0, z=0.0):
         """
         Set the size of the axes (in its local coordinate system; this does not affect the transform)
-        Arguments can be x,y,z or size=QVector3D().
         """
-        if size is not None:
-            x = size.x()
-            y = size.y()
-            z = size.z()
         self.__size = [x,y,z]
         self.updateLines()
         
@@ -150,7 +158,9 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
     
     def updateLines(self):
         if self.lineplot is None \
-           or self.x_major_plot is None:
+           or self.x_major_plot is None\
+           or self.y_major_plot is None\
+           or self.z_major_plot is None:
             # still initializing
             return
 
@@ -163,9 +173,9 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         ], dtype=np.float32).reshape((-1, 3))
 
         color = np.array([
-            [0, 1, 0, 0.6],     # z is green
-            [1, 1, 0, 0.6],     # y is yellow
-            [0, 0, 1, 0.6],     # x is blue
+            self.z_color,     
+            self.y_color,     
+            self.x_color
         ], dtype=np.float32)
 
         # color both vertices of each line segment
@@ -173,17 +183,35 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
 
         self.lineplot.setData(pos=pos, color=color)
 
-        ######
+        ###### Major Ticks
+        def buildMajorTickPos(step, height, axis):
+            ticks = np.arange(step, self.__size[axis]+step, step)
+            ticks.repeat(2)
+            
+            pos = np.zeros((ticks.size,3))
+            pos[:,axis] = ticks
+            pos[:,(axis+2)%3] = np.tile([height/2, -height/2], ticks.size//2) 
+
+            return pos
+
+        tick_color = np.array([1, 1, 1, 1], dtype=np.float32)
         major_height = 0.25
         x_major_step = 0.5
-        ticks = np.arange(x_major_step, self.__size[0]+x_major_step, x_major_step)
-        color = [1.0, 1.0, 1.0, 1.0]
-
-        pos = np.zeros((ticks.size*2,3))
-        pos[:,0] = ticks.repeat(2)
-        pos[:,2] = np.tile([major_height/2, -major_height/2], ticks.size) 
-
-        self.x_major_plot.setData(pos=pos, color=color)
+        y_major_step = 0.5
+        z_major_step = 0.5
+        
+        # self.x_major_plot.setData(pos=buildMajorTickPos(x_major_step,
+        #                                                 major_height,
+        #                                                 0),
+        #                           color=tick_color)
+        # self.y_major_plot.setData(pos=buildMajorTickPos(x_major_step,
+        #                                                 major_height,
+        #                                                 1),
+        #                           color=tick_color)
+        # self.z_major_plot.setData(pos=buildMajorTickPos(x_major_step,
+        #                                                 major_height,
+        #                                                 2),
+        #                           color=tick_color)
 
         
         #####
