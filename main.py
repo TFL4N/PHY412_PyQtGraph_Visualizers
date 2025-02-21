@@ -146,15 +146,19 @@ class BaseWidget(QWidget):
         self.frame += 1
 
     def buildAxes(self):
-        self.axes = myGLAxisItem()
-        self.axes.setSize(x=5, y=5, z=5)
+        self.axes = myGLAxisItem(x_min=-3, x_max=3,
+                                 y_min=-3, y_max=3,
+                                 z_min=-3, z_max=3)
         self.axes.rotate(-90,0,1,0)
         self.canvas.addItem(self.axes)
 
         pad = 0.25
-        x_label = gl.GLTextItem(parentItem=self.axes, pos=[5.0+pad,0.0,0.0], text="x")
-        y_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,5.0+pad,0.0], text="y")
-        z_label = gl.GLTextItem(parentItem=self.axes, pos=[0.0,0.0,5.0+pad], text="z")
+        x_label = gl.GLTextItem(parentItem=self.axes,
+                                pos=[self.axes.x_max+pad,0.0,0.0], text="x")
+        y_label = gl.GLTextItem(parentItem=self.axes,
+                                pos=[0.0,self.axes.y_max+pad,0.0], text="y")
+        z_label = gl.GLTextItem(parentItem=self.axes,
+                                pos=[0.0,0.0,self.axes.z_max+pad], text="z")
         
     def startAnimating(self):
         self.stopAnimating()
@@ -179,6 +183,7 @@ class BaseWidget(QWidget):
 
     def handleDebugActionPress(self, state):
         print(self.canvas.cameraPosition())
+        print(self.canvas.opts)
 
     def handleFreqChange(self, val):
         min_freq = 0.5
@@ -191,14 +196,18 @@ class BaseWidget(QWidget):
 class Part1_Widget(BaseWidget):
     def setupScene(self):        
         self.buildAxes()
-
+        self.canvas.setCameraPosition(distance=30,
+                                      elevation=0,
+                                      azimuth=90)
+        self.canvas.pan(-5,0,0)
+        
         self.e_vec = myVectorItem(parentItem=self.axes,
                                   color=[1,0,0,1],
                                   end=[5.0,0.0,0.0])
         self.e_vec.setDepthValue(5)
         
     def updateScene(self, t):
-        x = 5.0 * np.cos(self.freq*t)
+        x = 3.0 * np.cos(self.freq*t)
 
         self.e_vec.setPosition(end=[x,0.0,0.0])
 

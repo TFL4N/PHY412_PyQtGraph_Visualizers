@@ -112,15 +112,8 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.update()
         
 
-class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
-    """
-    **Bases:** :class:`GLGraphicsItem <pyqtgraph.opengl.GLGraphicsItem.GLGraphicsItem>`
-    
-    Displays three lines indicating origin and orientation of local coordinate system. 
-    
-    """
-    
-    def __init__(self, x=5.0, y=5.0, z=5.0, x_color=[1,1,1,1], y_color=[1,1,1,1], z_color=[1,1,1,1], antialias=True, glOptions='translucent', parentItem=None):
+class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):    
+    def __init__(self, parentItem=None, antialias=True, glOptions='translucent', **kwds):
         super().__init__()
 
         self.lineplot = None    # mark that we are still initializing
@@ -128,11 +121,30 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.y_major_plot = None
         self.z_major_plot = None
 
-        self.x_color = x_color
-        self.y_color = y_color
-        self.z_color = z_color
-        self.setSize(x,y,z)
+        self.x_min = -5.0
+        self.x_max = 5.0
+        self.x_step = 1.0
+        self.x_tick_plane = 2
+        
+        self.y_min = -5.0
+        self.y_max = 5.0
+        self.y_step = 1.0
+        self.y_tick_plane = 0
 
+        self.z_min = -5.0
+        self.z_max = 5.0
+        self.z_step = 1.0
+        self.z_tick_plane = 0
+
+        self.major_height = 0.25
+        
+        self.x_color = [1,1,1,1]
+        self.y_color = [1,1,1,1]
+        self.z_color = [1,1,1,1]
+
+        self.setData(**kwds)
+        
+        # line plots
         self.lineplot = gl.GLLinePlotItem(
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
         )
@@ -150,34 +162,39 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         
        # x_text = gl.GLTextItem(parentItem=self, pos=[self.size()[0],0.0,0.0], text="x")
 
-        
         self.setParentItem(parentItem)
         self.updateLines()
 
-    def setSize(self, x=0.0, y=0.0, z=0.0):
-        """
-        Set the size of the axes (in its local coordinate system; this does not affect the transform)
-        """
-        self.__size = [x,y,z]
+    def setData(self, **kwds):
+        args = ['x_min', 'x_max', 'x_step', 'x_tick_plane',
+                'y_min', 'y_max', 'y_step', 'y_tick_plane',
+                'z_min', 'z_max', 'z_step', 'z_tick_plane',
+                'x_color', 'y_color', 'z_color',
+                'major_height']
+
+        # perform any validation and set values
+        for k in kwds.keys():
+            if k not in args:
+                raise ValueError('Invalid keyword argument: %s (allowed arguments are %s)' % (k, str(args)))
+
+        for arg in args:
+            if arg in kwds:
+                value = kwds[arg]
+                setattr(self, arg, value)
+
+        # done 
         self.updateLines()
         
-    def size(self):
-        return self.__size[:]
     
     def updateLines(self):
-        if self.lineplot is None \
-           or self.x_major_plot is None\
-           or self.y_major_plot is None\
-           or self.z_major_plot is None:
+        if self.lineplot is None:
             # still initializing
             return
 
-        x,y,z = self.size()
-
         pos = np.array([
-            [0, 0, 0, 0, 0, z],
-            [0, 0, 0, 0, y, 0],
-            [0, 0, 0, x, 0, 0],
+            [0, 0, self.z_min, 0, 0, self.z_max],
+            [0, self.y_min, 0, 0, self.y_max, 0],
+            [self.x_min, 0, 0, self.x_max, 0, 0],
         ], dtype=np.float32).reshape((-1, 3))
 
         color = np.array([
@@ -192,34 +209,41 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.lineplot.setData(pos=pos, color=color)
 
         ###### Major Ticks
-        def buildMajorTickPos(step, height, axis):
-            ticks = np.arange(step, self.__size[axis]+step, step)
-            ticks.repeat(2)
-            
+        def buildMajorTickPos(min_val, max_val, step, height, axis, plane):
+            neg_ticks = np.arange(-step, min_val-step, -step)
+            pos_ticks = np.arange(step, max_val+step, step)
+            ticks = np.concatenate((np.flip(neg_ticks), pos_ticks))
+            ticks = ticks.repeat(2)
+
             pos = np.zeros((ticks.size,3))
             pos[:,axis] = ticks
-            pos[:,(axis+2)%3] = np.tile([height/2, -height/2], ticks.size//2) 
-
+            pos[:,plane] = np.tile([height/2, -height/2], ticks.size//2) 
+            
             return pos
 
         tick_color = np.array([1, 1, 1, 1], dtype=np.float32)
-        major_height = 0.25
-        x_major_step = 0.5
-        y_major_step = 0.5
-        z_major_step = 0.5
         
-        # self.x_major_plot.setData(pos=buildMajorTickPos(x_major_step,
-        #                                                 major_height,
-        #                                                 0),
-        #                           color=tick_color)
-        # self.y_major_plot.setData(pos=buildMajorTickPos(x_major_step,
-        #                                                 major_height,
-        #                                                 1),
-        #                           color=tick_color)
-        # self.z_major_plot.setData(pos=buildMajorTickPos(x_major_step,
-        #                                                 major_height,
-        #                                                 2),
-        #                           color=tick_color)
+        self.x_major_plot.setData(pos=buildMajorTickPos(self.x_min,
+                                                        self.x_max,
+                                                        self.x_step,
+                                                        self.major_height,
+                                                        0,
+                                                        self.x_tick_plane),
+                                  color=self.x_color)
+        self.y_major_plot.setData(pos=buildMajorTickPos(self.y_min,
+                                                        self.y_max,
+                                                        self.y_step,
+                                                        self.major_height,
+                                                        1,
+                                                        self.y_tick_plane),
+                                  color=self.y_color)
+        self.z_major_plot.setData(pos=buildMajorTickPos(self.z_min,
+                                                        self.z_max,
+                                                        self.z_step,
+                                                        self.major_height,
+                                                        2,
+                                                        self.z_tick_plane),
+                                  color=self.z_color)
 
         
         #####
