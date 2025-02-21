@@ -6,4 +6,5 @@ dependencies:
   - pyqt=5               
   - pyqtgraph           
   - pyopengl
+  - matplotlib
   
