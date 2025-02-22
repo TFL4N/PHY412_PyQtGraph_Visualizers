@@ -2,6 +2,8 @@
 import numpy as np
 
 from pyqtgraph.Qt import QtGui
+from pyqtgraph.Qt import QtCore
+from pyqtgraph.Qt.QtCore import Qt
 import pyqtgraph.opengl as gl
 
 def generate_cone(radius, height, segments):
@@ -248,3 +250,87 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         
         #####
         self.update()
+
+class myGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
+    """Draws image in 3D but always faces camera"""
+
+    def __init__(self, parentItem=None, **kwds):
+        """All keyword arguments are passed to setData()"""
+        super().__init__(parentItem=parentItem)
+        glopts = kwds.pop('glOptions', 'additive')
+        self.setGLOptions(glopts)
+
+        self.pos = np.array([0.0, 0.0, 0.0])
+        self.image = None
+        self.height = 100
+        self.width = 100
+        self.__qimage = None
+        self.setData(**kwds)
+
+
+
+    def setData(self, **kwds):
+        """
+        Update the data displayed by this item. All arguments are optional;
+        for example it is allowed to update text while leaving colors unchanged, etc.
+
+        ====================  ==================================================
+        **Arguments:**
+        ------------------------------------------------------------------------
+        pos                   (3,) array of floats specifying text location.
+        image                 string - path to image
+        height                integer - image height *will keep aspect ratio
+        width                 integer - image width *will keep aspect ratio
+        ====================  ==================================================
+        """
+        args = ['pos', 'image', 'height', 'width']
+        for k in kwds.keys():
+            if k not in args:
+                raise ValueError('Invalid keyword argument: %s (allowed arguments are %s)' % (k, str(args)))
+        for arg in args:
+            if arg in kwds:
+                value = kwds[arg]
+                if arg == 'pos':
+                    if isinstance(value, np.ndarray):
+                        if value.shape != (3,):
+                            raise ValueError('"pos.shape" must be (3,).')
+                    elif isinstance(value, (tuple, list)):
+                        if len(value) != 3:
+                            raise ValueError('"len(pos)" must be 3.')
+                elif arg == 'image' or arg == 'height' or arg == 'width':
+                    self.__qimage = None
+                setattr(self, arg, value)
+            self.update()
+
+
+
+    def paint(self):
+        if self.image is None:
+            return
+
+        # load image from file if needed
+        if self.__qimage is None:
+            self.__qimage = QtGui.QImage()
+            if not self.__qimage.load(self.image):
+                print(f"Error: Could not load image at {self.image}")
+                return
+            self.__qimage = self.__qimage.scaled(self.width, self.height,
+                                                 Qt.AspectRatioMode.KeepAspectRatio,
+                                                 Qt.TransformationMode.SmoothTransformation)
+                    
+        self.setupGLState()
+
+        project = self.compute_projection()
+        vec3 = QtGui.QVector3D(*self.pos)
+        text_pos = project.map(vec3).toPointF()
+
+        painter = QtGui.QPainter(self.view())
+        painter.drawImage(text_pos, self.__qimage)
+        painter.end()
+
+    def compute_projection(self):
+        # note that QRectF.bottom() != QRect.bottom()
+        rect = QtCore.QRectF(self.view().rect())
+        ndc_to_viewport = QtGui.QMatrix4x4()
+        ndc_to_viewport.viewport(rect.left(), rect.bottom(), rect.width(), -rect.height())
+        return ndc_to_viewport * self.mvpMatrix()
