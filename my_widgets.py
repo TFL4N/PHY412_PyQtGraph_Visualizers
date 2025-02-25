@@ -5,6 +5,9 @@ from pyqtgraph.Qt import QtCore
 from pyqtgraph.Qt.QtCore import Qt
 import pyqtgraph.opengl as gl
 
+def linear_scale(x1=0.0,x2=1.0,y1=0.0,y2=1.0,y=0.5):
+    return (float(y)-y1)/(y2-y1) * (x2-x1) + x1
+
 class MyTimer(QtCore.QObject):
     'Time units are milliseconds; block is a function type'
     def __init__(self, duration=None, interval=100, block=None):
@@ -88,8 +91,8 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.start = np.array(start)
         self.end = np.array(end)
         self.width = width
-        self.tip_height = 1.0
-        self.tip_radius = 0.5
+        self.tip_height = 0.3
+        self.tip_radius = 0.25
         self.color = color
 
         
@@ -175,6 +178,10 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.y_color = [1,1,1,1]
         self.z_color = [1,1,1,1]
 
+        self.x_visible = True
+        self.y_visible = True
+        self.z_visible = True
+        
         self.setData(**kwds)
         
         # line plots
@@ -201,6 +208,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
                 'y_min', 'y_max', 'y_step', 'y_tick_plane',
                 'z_min', 'z_max', 'z_step', 'z_tick_plane',
                 'x_color', 'y_color', 'z_color',
+                'x_visible', 'y_visible', 'z_visible', 
                 'major_height']
 
         # perform any validation and set values
@@ -222,19 +230,22 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
             # still initializing
             return
 
-        pos = np.array([
-            [0, 0, self.z_min, 0, 0, self.z_max],
-            [0, self.y_min, 0, 0, self.y_max, 0],
-            [self.x_min, 0, 0, self.x_max, 0, 0],
-        ], dtype=np.float32).reshape((-1, 3))
+        ### axis lines
+        pos = []
+        color = []
+        if self.z_visible:
+            pos.append([0, 0, self.z_min, 0, 0, self.z_max])
+            color.append(self.z_color)
+        if self.y_visible:
+            pos.append([0, self.y_min, 0, 0, self.y_max, 0])
+            color.append(self.y_color)
+        if self.x_visible:
+            pos.append([self.x_min, 0, 0, self.x_max, 0, 0])
+            color.append(self.x_color)
+            
+        pos = np.array(pos, dtype=np.float32).reshape((-1, 3))
 
-        color = np.array([
-            self.z_color,     
-            self.y_color,     
-            self.x_color
-        ], dtype=np.float32)
-
-        # color both vertices of each line segment
+        color = np.array(color, dtype=np.float32)
         color = np.hstack((color, color)).reshape((-1, 4))
 
         self.lineplot.setData(pos=pos, color=color)
@@ -261,6 +272,8 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
                                                         0,
                                                         self.x_tick_plane),
                                   color=self.x_color)
+        self.x_major_plot.setVisible(self.x_visible)
+        
         self.y_major_plot.setData(pos=buildMajorTickPos(self.y_min,
                                                         self.y_max,
                                                         self.y_step,
@@ -268,6 +281,8 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
                                                         1,
                                                         self.y_tick_plane),
                                   color=self.y_color)
+        self.y_major_plot.setVisible(self.y_visible)
+        
         self.z_major_plot.setData(pos=buildMajorTickPos(self.z_min,
                                                         self.z_max,
                                                         self.z_step,
@@ -275,6 +290,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
                                                         2,
                                                         self.z_tick_plane),
                                   color=self.z_color)
+        self.z_major_plot.setVisible(self.z_visible)
 
         
         #####

@@ -126,8 +126,6 @@ class BaseWidget(QWidget):
         opts_layout.addWidget(w, 6, 1)
 
         
-
-        
         ### main layout
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.canvas)
@@ -161,14 +159,15 @@ class BaseWidget(QWidget):
         pad = 0.25
         self.x_label = myGLImageItem(parentItem=self.axes,
                                      pos=[self.axes.x_max+pad,0.0,0.0],
-                                     image='latex/vec_e.png',
+                                     image='latex/hat_e_1.png',
                                      height=30)
-        self.y_label = gl.GLTextItem(parentItem=self.axes,
+        self.y_label = myGLImageItem(parentItem=self.axes,
                                      pos=[0.0,self.axes.y_max+pad,0.0],
-                                     text="y")
+                                     image='latex/hat_e_2.png',
+                                     height=30)
         self.z_label = myGLImageItem(parentItem=self.axes,
-                                     pos=[0.0,0.0,self.axes.x_max+pad],
-                                     image='latex/vec_k.png',
+                                     pos=[0.0,0.0,self.axes.z_max+pad],
+                                     image='latex/hat_k.png',
                                      height=30)
     #
     # Transitions
@@ -236,13 +235,10 @@ class BaseWidget(QWidget):
         self.restartAnimation()
 
     def handleFreqChange(self, val):
-        min_freq = 0.5
-        max_freq = 5.0
-        val = float(val)/1000
-        val *= max_freq - min_freq
-        val += min_freq
-        self.freq = val
-
+        self.freq = linear_scale(x1=0.5,
+                                 x2=5.0,
+                                 y2=1000,
+                                 y=val)
         self.restartAnimation()
 
     def handlePhaseChange(self, val):
@@ -255,45 +251,6 @@ class BaseWidget(QWidget):
         print(self.canvas.cameraPosition())
         print(self.canvas.opts)
 
-
-        
-# class Part2_Widget(BaseWidget):
-#     def setupScene(self):
-#         ## axis
-#         self.axes = myGLAxisItem()
-#         self.axes.setSize(x=5, y=5, z=5)
-#         self.axes.lineplot.setData(width=5.0)
-#         self.axes.rotate(-90,0,1,0)
-#         self.canvas.addItem(self.axes)
-
-#         self.graph = gl.GLLinePlotItem(parentItem=self.axes,
-#                                        pos=[0.0,0.0,0.0],
-#                                        color=[1.0,1.0,1.0,1.0],
-#                                        width=5.0,
-#                                        antialias=True,
-#                                        mode='line_strip')
-#         #self.canvas.addItem(self.graph)
-
-#     def updateScene(self, t):
-#         duration = 10.0
-#         t = t % duration
-
-#         ts = np.arange(0,t+0.25,0.25)
-#         data = np.zeros((ts.size,3))
-#         data[:,2] = ts
-#         data[:,0] = np.cos(data[:,2])
-
-#         self.graph.setData(pos=data)
-        
-#         ########################
-
-#         text = gl.GLTextItem(parentItem=self.axes, pos=[0.0,0.0,0.0], text="Origin")
-#         #self.canvas.addItem(text)
-        
-#         # vec = myVectorItem(parentItem=axes,
-#         #                    end=[5.0,5.0,5.0])
-
-#         # self.canvas.addItem(vec)
 
         
 ## build a QApplication before building other widgets
