@@ -1,10 +1,41 @@
-# borrowed from https://github.com/pyqtgraph/pyqtgraph/blob/master/pyqtgraph/opengl/items/GLAxisItem.py
 import numpy as np
 
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
 from pyqtgraph.Qt.QtCore import Qt
 import pyqtgraph.opengl as gl
+
+class MyTimer(QtCore.QObject):
+    'Time units are milliseconds; block is a function type'
+    def __init__(self, duration=None, interval=100, block=None):
+        super().__init__()
+
+        self.duration = duration
+        self.interval = interval
+        self.block = block
+        self.counter = 0.0
+        
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(self.interval)
+        self.timer.timeout.connect(self.on_timeout)
+        
+    def start_timer(self):
+        self.timer.start()
+
+    def stop_timer(self):
+        self.timer.stop()
+
+    def on_timeout(self):
+        if self.duration is not None \
+           and self.counter >= self.duration:
+            self.timer.stop()
+
+        # call function block with float t in seconds
+        if self.block is not None:
+            self.block(float(self.counter) / 1000)
+            
+        self.counter += self.interval
+
 
 def generate_cone(radius, height, segments):
     """
@@ -113,7 +144,7 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         
         self.update()
         
-
+# Inspiration: https://github.com/pyqtgraph/pyqtgraph/blob/master/pyqtgraph/opengl/items/GLAxisItem.py
 class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):    
     def __init__(self, parentItem=None, antialias=True, glOptions='translucent', **kwds):
         super().__init__()
@@ -162,8 +193,6 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
             parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
         )
         
-       # x_text = gl.GLTextItem(parentItem=self, pos=[self.size()[0],0.0,0.0], text="x")
-
         self.setParentItem(parentItem)
         self.updateLines()
 
@@ -251,6 +280,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         #####
         self.update()
 
+# Inspiration: https://github.com/pyqtgraph/pyqtgraph/blob/master/pyqtgraph/opengl/items/GLTextItem.py
 class myGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
     """Draws image in 3D but always faces camera"""
 
