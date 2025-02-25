@@ -50,6 +50,9 @@ class MyTimer(QObject):
     def start_timer(self):
         self.timer.start()
 
+    def stop_timer(self):
+        self.timer.stop()
+
     def on_timeout(self):
         if self.duration is not None \
            and self.counter >= self.duration:
@@ -67,7 +70,7 @@ class BaseWidget(QWidget):
     def __init__(self, autostart=True):
         super().__init__()
 
-        self.setWindowTitle("Ewald Sphere Popout")
+        self.setWindowTitle("EM Polarization")
         self.resize(500,500)
 
         # gl view
@@ -111,6 +114,15 @@ class BaseWidget(QWidget):
         opts_layout.addWidget(w, 2, 1)
 
         
+        l = QLabel("Restart Animation")
+
+        w = QPushButton("Restart")
+        w.clicked.connect(self.handleRestartAnimationPress)
+
+        opts_layout.addWidget(l, 3, 0)
+        opts_layout.addWidget(w, 3, 1)
+
+        
         l = QLabel("Frequency")
 
         w = QSlider(Qt.Horizontal)
@@ -119,8 +131,8 @@ class BaseWidget(QWidget):
         w.setMaximum(1000)
         w.valueChanged.connect(self.handleFreqChange)
 
-        opts_layout.addWidget(l, 3, 0)
-        opts_layout.addWidget(w, 3, 1)
+        opts_layout.addWidget(l, 4, 0)
+        opts_layout.addWidget(w, 4, 1)
 
         
         main_layout = QVBoxLayout()
@@ -148,17 +160,27 @@ class BaseWidget(QWidget):
     def buildAxes(self):
         self.axes = myGLAxisItem(x_min=-3, x_max=3,
                                  y_min=-3, y_max=3,
-                                 z_min=-3, z_max=3)
+                                 z_min=-3, z_max=3,
+                                 glOptions='opaque')
         self.axes.rotate(-90,0,1,0)
         self.canvas.addItem(self.axes)
 
         pad = 0.25
-        x_label = gl.GLTextItem(parentItem=self.axes,
-                                pos=[self.axes.x_max+pad,0.0,0.0], text="x")
-        y_label = gl.GLTextItem(parentItem=self.axes,
-                                pos=[0.0,self.axes.y_max+pad,0.0], text="y")
-        z_label = gl.GLTextItem(parentItem=self.axes,
-                                pos=[0.0,0.0,self.axes.z_max+pad], text="z")
+        self.x_label = myGLImageItem(parentItem=self.axes,
+                                     pos=[self.axes.x_max+pad,0.0,0.0],
+                                     image='latex/vec_e.png',
+                                     height=30)
+        self.y_label = gl.GLTextItem(parentItem=self.axes,
+                                     pos=[0.0,self.axes.y_max+pad,0.0],
+                                     text="y")
+        self.z_label = myGLImageItem(parentItem=self.axes,
+                                     pos=[0.0,0.0,self.axes.x_max+pad],
+                                     image='latex/vec_k.png',
+                                     height=30)
+        
+    def restartAnimation(self):
+        self.stopAnimating()
+        self.startAnimating()
         
     def startAnimating(self):
         self.stopAnimating()
@@ -168,7 +190,7 @@ class BaseWidget(QWidget):
 
     def stopAnimating(self):
         if self.timer is not None:
-            self.timer.stop()
+            self.timer.stop_timer()
             self.timer = None
         
     def playAnimation(self, duration):
@@ -181,6 +203,9 @@ class BaseWidget(QWidget):
     def handlePlayAnimationPress(self, state):
         self.playAnimation(10)
 
+    def handleRestartAnimationPress(self, state):
+        self.restartAnimation()
+        
     def handleDebugActionPress(self, state):
         print(self.canvas.cameraPosition())
         print(self.canvas.opts)
@@ -193,23 +218,33 @@ class BaseWidget(QWidget):
         val += min_freq
         self.freq = val
 
+        self.restartAnimation()
+
 class Part1_Widget(BaseWidget):
     def setupScene(self):        
+        self.setWindowTitle("EM Polarization - Part 1")
+
         self.buildAxes()
-        self.canvas.setCameraPosition(distance=30,
+        self.canvas.setCameraPosition(distance=10,
                                       elevation=0,
-                                      azimuth=90)
-        self.canvas.pan(-5,0,0)
-        
+                                      azimuth=180)
+
+        # theres apparently a bug in pyqtgraph
+        # that depth value is working like in earlier versions
+        # move the vector slightly off the origin for better drawing
         self.e_vec = myVectorItem(parentItem=self.axes,
                                   color=[1,0,0,1],
-                                  end=[5.0,0.0,0.0])
+                                  start=[0.0,0.0,0.05],
+                                  end=[5.0,0.0,0.05])
         self.e_vec.setDepthValue(5)
+
+        
         
     def updateScene(self, t):
         x = 3.0 * np.cos(self.freq*t)
 
-        self.e_vec.setPosition(end=[x,0.0,0.0])
+        self.e_vec.setPosition(start=[0.0,0.0,0.05],
+                               end=[x,0.0,0.05])
 
         
 class Part2_Widget(BaseWidget):

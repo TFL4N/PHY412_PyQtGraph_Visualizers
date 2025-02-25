@@ -49,7 +49,7 @@ def generate_cone(radius, height, segments):
 
 
 class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
-    def __init__(self, start=[0.0,0.0,0.0], end=[1.0,1.0,1.0], color=[1.0,1.0,1.0,1.0], width=1.0, parentItem=None, glOptions={}, antialias=True):
+    def __init__(self, start=[0.0,0.0,0.0], end=[1.0,1.0,1.0], color=[1.0,1.0,1.0,1.0], width=1.0, parentItem=None, glOptions='opaque', antialias=True):
         super().__init__()
 
         self.lineplot = None
@@ -73,7 +73,7 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
                                       color=np.array(color, dtype=float),
                                       smooth=False,
                                       computeNormals=False,
-                                      glOptions='opaque')
+                                      glOptions=glOptions)
         
         
         self.setParentItem(parentItem)
@@ -126,7 +126,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.x_min = -5.0
         self.x_max = 5.0
         self.x_step = 1.0
-        self.x_tick_plane = 2
+        self.x_tick_plane = 1
         
         self.y_min = -5.0
         self.y_max = 5.0
