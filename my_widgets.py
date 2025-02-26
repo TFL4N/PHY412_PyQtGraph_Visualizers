@@ -1,5 +1,4 @@
 import numpy as np
-from math import ceil
 
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
@@ -441,7 +440,7 @@ class MyDashedLineItem(gl.GLGraphicsItem.GLGraphicsItem):
         end = np.array(self.end, dtype=np.float32)
         mag = np.linalg.norm(end - start)
         norm_vec = (end-start)/mag
-        count = ceil(mag / (self.dash_len + self.space_len))
+        count = int(np.ceil(mag / (self.dash_len + self.space_len)))
         
         pos = []
         cur_pos = np.array(start)        
