@@ -194,6 +194,8 @@ class BaseWidget(QWidget):
             _class = getattr(_module, 'Part4')
         elif segment_num == 5:
             _class = getattr(_module, 'Part5')
+        elif segment_num == 6:
+            _class = getattr(_module, 'Part6')
         else:
             print('Unknown segment number')
             

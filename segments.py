@@ -374,9 +374,7 @@ class Part4(Segment):
         for i in range(down_plane_idx+1, len(self.down_planes)):
             self.down_planes[i].setVisible(False)
 
-
-        
-
+            
 class Part5(Segment):
     def __init__(self):
         super().__init__(5)
@@ -471,3 +469,112 @@ class Part5(Segment):
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
 
             self.e_graph.setData(pos=data)
+
+class Part6(Segment):
+    def __init__(self):
+        super().__init__(6)
+    
+    def setupScene(self, w):        
+        w.setWindowTitle("EM Polarization - Part 6")
+
+        w.canvas.setCameraPosition(distance=10,
+                                   elevation=10,
+                                   azimuth=110)
+
+
+        self.e_vecs = []
+        self.b_vecs = []
+        self.dz = 0.25
+        count = int(np.floor(w.axes.z_max/self.dz))
+        for _ in range(0,count):
+            vec = MyVectorItem(parentItem=w.axes,
+                               color=[1,0,0,1],
+                               start=[0.0,0.0,0.0],
+                               end=[w.magnitude,0.0,0.0])
+            self.e_vecs.append(vec)
+
+            
+            vec = MyVectorItem(parentItem=w.axes,
+                               color=[0,1,0,1],
+                               start=[0.0,0.0,0.0],
+                               end=[w.magnitude,0.0,0.0])
+            self.b_vecs.append(vec)
+        
+        # e graph
+        self.e_graph = gl.GLLinePlotItem(parentItem=w.axes,
+                                         pos=[0.0,0.0,0.0],
+                                         color=[1.0,0.0,0.0,1.0],
+                                         width=3.0,
+                                         antialias=True,
+                                         mode='line_strip')
+
+        # b graph
+        self.b_graph = gl.GLLinePlotItem(parentItem=w.axes,
+                                         pos=[0.0,0.0,0.0],
+                                         color=[0.0,1.0,0.0,1.0],
+                                         width=3.0,
+                                         antialias=True,
+                                         mode='line_strip')
+
+        
+
+    def tearDownScene(self, w):
+        # remove e_graph from scene
+        self.e_graph.setParentItem(None)
+        w.canvas.removeItem(self.e_graph)
+        self.e_graph = None
+
+        # remove e_vecs
+        for v in self.e_vecs:
+            v.setParentItem(None)
+            w.canvas.removeItem(v)
+        self.e_vecs = []
+
+        # remove b_graph from scene
+        self.b_graph.setParentItem(None)
+        w.canvas.removeItem(self.b_graph)
+        self.b_graph = None
+
+        # remove b_vecs
+        for v in self.b_vecs:
+            v.setParentItem(None)
+            w.canvas.removeItem(v)
+        self.b_vecs = []
+
+        
+    def updateScene(self, w, t):
+        # e vecs
+        for idx, vec in enumerate(self.e_vecs):
+            z = self.dz*(idx+1) + t
+            z = z % w.axes.z_max
+            x = w.magnitude * np.cos(w.freq*z - w.freq*t)
+            
+            vec.setPosition(start=[0.0,0.0,z],
+                            end=[x,0.0,z])
+            
+            
+        # e_graph
+        zs = np.arange(0,w.axes.z_max+0.1,0.1)
+        data = np.zeros((zs.size,3))
+        data[:,2] = zs
+        data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
+        
+        self.e_graph.setData(pos=data)
+
+        # b vecs
+        for idx, vec in enumerate(self.b_vecs):
+            z = self.dz*(idx+1) + t
+            z = z % w.axes.z_max
+            y = w.magnitude * np.cos(w.freq*z - w.freq*t)
+            
+            vec.setPosition(start=[0.0,0.0,z],
+                            end=[0.0,y,z])
+            
+            
+        # b_graph
+        zs = np.arange(0,w.axes.z_max+0.1,0.1)
+        data = np.zeros((zs.size,3))
+        data[:,2] = zs
+        data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
+        
+        self.b_graph.setData(pos=data)
