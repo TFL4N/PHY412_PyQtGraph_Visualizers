@@ -387,11 +387,87 @@ class Part5(Segment):
         w.canvas.setCameraPosition(distance=10,
                                    elevation=10,
                                    azimuth=110)
+
+
+        self.e_vecs = []
+        self.dz = 0.25
+        count = int(np.floor(w.axes.z_max/self.dz))
+        for _ in range(0,count):
+            vec = MyVectorItem(parentItem=w.axes,
+                               color=[1,0,0,1],
+                               start=[0.0,0.0,0.0],
+                               end=[w.magnitude,0.0,0.0])
+            self.e_vecs.append(vec)
+        
+        # e graph
+        self.e_graph = gl.GLLinePlotItem(parentItem=w.axes,
+                                         pos=[0.0,0.0,0.0],
+                                         color=[1.0,0.0,0.0,1.0],
+                                         width=3.0,
+                                         antialias=True,
+                                         mode='line_strip')
+
         
 
     def tearDownScene(self, w):
-        pass
+        # remove e_graph from scene
+        self.e_graph.setParentItem(None)
+        w.canvas.removeItem(self.e_graph)
+        self.e_graph = None
+
+        # remove e_vecs
+        for v in self.e_vecs:
+            v.setParentItem(None)
+            w.canvas.removeItem(v)
+        self.e_vecs = []
+
         
     def updateScene(self, w, t):
-        pass
+        pt_1_dur = 5.0
+        pt_2_dur = 2.0
 
+        if t <= pt_1_dur:
+            # part 1
+            # show sampled z one by one
+            self.e_graph.setVisible(False)
+
+            dt = pt_1_dur / len(self.e_vecs)
+            for idx, vec in enumerate(self.e_vecs):
+                z = self.dz*(idx+1)
+                x = w.magnitude * np.cos(w.freq*z)
+
+                vec.setPosition(start=[0.0,0.0,z],
+                                end=[x,0.0,z])
+                vec.setVisible(idx*dt < t)
+        elif t <= pt_1_dur + pt_2_dur:
+            # part 2
+            # show e graph
+            zs = np.arange(0,w.axes.z_max+0.1,0.1)
+            data = np.zeros((zs.size,3))
+            data[:,2] = zs
+            data[:,0] = w.magnitude * np.cos(w.freq*data[:,2])
+            
+            self.e_graph.setData(pos=data)
+            self.e_graph.setVisible(True)
+        else:
+            # part 3
+            # animate
+            t -= pt_1_dur + pt_2_dur
+
+            # vecs
+            for idx, vec in enumerate(self.e_vecs):
+                z = self.dz*(idx+1) + t
+                z = z % w.axes.z_max
+                x = w.magnitude * np.cos(w.freq*z - w.freq*t)
+
+                vec.setPosition(start=[0.0,0.0,z],
+                                end=[x,0.0,z])
+
+
+            # e_graph
+            zs = np.arange(0,w.axes.z_max+0.1,0.1)
+            data = np.zeros((zs.size,3))
+            data[:,2] = zs
+            data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
+
+            self.e_graph.setData(pos=data)

@@ -14,19 +14,11 @@ from pyqtgraph.Qt.QtWidgets import (
     QWidget,
     QHBoxLayout,
     QVBoxLayout,
-    QSplitter,
     QGridLayout,
     QLabel,
     QSlider,
-    QSpinBox,
     QCheckBox,
-    QComboBox,
-    QPushButton,
-    QDialog,
-    QColorDialog,
-    QFileDialog,
-    QInputDialog,
-    QMessageBox
+    QPushButton
     )
 
         
