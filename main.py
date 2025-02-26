@@ -44,6 +44,7 @@ class BaseWidget(QWidget):
         # canvas items
         self.timer = None
         self.frame = 0
+        self.magnitude = 3.0
         self.freq = 0.5
         self.phase_diff = 0.0
 
@@ -149,7 +150,7 @@ class BaseWidget(QWidget):
         self.frame += 1
         
     def buildAxes(self):
-        self.axes = myGLAxisItem(x_min=-3, x_max=3,
+        self.axes = MyGLAxisItem(x_min=-3, x_max=3,
                                  y_min=-3, y_max=3,
                                  z_min=-3, z_max=3,
                                  glOptions='opaque')
@@ -157,15 +158,15 @@ class BaseWidget(QWidget):
         self.canvas.addItem(self.axes)
 
         pad = 0.25
-        self.x_label = myGLImageItem(parentItem=self.axes,
+        self.x_label = MyGLImageItem(parentItem=self.axes,
                                      pos=[self.axes.x_max+pad,0.0,0.0],
                                      image='latex/hat_e_1.png',
                                      height=30)
-        self.y_label = myGLImageItem(parentItem=self.axes,
+        self.y_label = MyGLImageItem(parentItem=self.axes,
                                      pos=[0.0,self.axes.y_max+pad,0.0],
                                      image='latex/hat_e_2.png',
                                      height=30)
-        self.z_label = myGLImageItem(parentItem=self.axes,
+        self.z_label = MyGLImageItem(parentItem=self.axes,
                                      pos=[0.0,0.0,self.axes.z_max+pad],
                                      image='latex/hat_k.png',
                                      height=30)
@@ -195,6 +196,8 @@ class BaseWidget(QWidget):
             _class = getattr(_module, 'Part1')
         elif segment_num == 2:
             _class = getattr(_module, 'Part2')
+        elif segment_num == 3:
+            _class = getattr(_module, 'Part3')
         else:
             print('Unknown segment number')
             

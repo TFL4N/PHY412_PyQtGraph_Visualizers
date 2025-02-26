@@ -1,4 +1,5 @@
 import numpy as np
+from math import ceil
 
 from pyqtgraph.Qt import QtGui
 from pyqtgraph.Qt import QtCore
@@ -82,7 +83,7 @@ def generate_cone(radius, height, segments):
     return gl.MeshData(vertexes=vertices, faces=faces)
 
 
-class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
+class MyVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
     def __init__(self, start=[0.0,0.0,0.0], end=[1.0,1.0,1.0], color=[1.0,1.0,1.0,1.0], width=1.0, parentItem=None, glOptions='opaque', antialias=True):
         super().__init__()
 
@@ -148,7 +149,7 @@ class myVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.update()
         
 # Inspiration: https://github.com/pyqtgraph/pyqtgraph/blob/master/pyqtgraph/opengl/items/GLAxisItem.py
-class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):    
+class MyGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):    
     def __init__(self, parentItem=None, antialias=True, glOptions='translucent', **kwds):
         super().__init__()
 
@@ -160,7 +161,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.x_min = -5.0
         self.x_max = 5.0
         self.x_step = 1.0
-        self.x_tick_plane = 1
+        self.x_tick_plane = 2
         
         self.y_min = -5.0
         self.y_max = 5.0
@@ -297,7 +298,7 @@ class myGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.update()
 
 # Inspiration: https://github.com/pyqtgraph/pyqtgraph/blob/master/pyqtgraph/opengl/items/GLTextItem.py
-class myGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
+class MyGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
     """Draws image in 3D but always faces camera"""
 
     def __init__(self, parentItem=None, **kwds):
@@ -380,3 +381,85 @@ class myGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
         ndc_to_viewport = QtGui.QMatrix4x4()
         ndc_to_viewport.viewport(rect.left(), rect.bottom(), rect.width(), -rect.height())
         return ndc_to_viewport * self.mvpMatrix()
+
+
+class MyDashedLineItem(gl.GLGraphicsItem.GLGraphicsItem):    
+    def __init__(self, parentItem=None, antialias=True, glOptions='opaque', **kwds):
+        super().__init__()
+
+        self.lineplot = None    # mark that we are still initializing
+
+        self.color = [1.0,1.0,1.0,1.0]
+        self.start = [0.0,0.0,0.0]
+        self.end = [1.0,1.0,1.0]
+        self.dash_len = 0.25
+        self.space_len = 0.25
+        
+        self.setData(**kwds)
+        
+        self.lineplot = gl.GLLinePlotItem(
+            parentItem=self, glOptions=glOptions, mode='lines', antialias=antialias
+        )
+        self.lineplot.setData(width=3.0)
+        
+        
+        self.setParentItem(parentItem)
+        self.updateLines()
+
+    def setData(self, **kwds):
+        args = ['color','start', 'end', 'dash_len', 'space_len']
+
+        # perform any validation and set values
+        for k in kwds.keys():
+            if k not in args:
+                raise ValueError('Invalid keyword argument: %s (allowed arguments are %s)' % (k, str(args)))
+
+        for arg in args:
+            if arg in kwds:
+                value = kwds[arg]
+                if arg == 'start' or arg == 'end':
+                    if isinstance(value, np.ndarray):
+                        if value.shape != (3,1):
+                            raise ValueError('"start/end.shape" must be (3,1).')
+                    elif isinstance(value, (tuple, list)):
+                        if len(value) != 3:
+                            raise ValueError('"len(start/end)" must be 3.')
+
+                setattr(self, arg, value)
+
+        # done 
+        self.updateLines()
+        
+    
+    def updateLines(self):
+        if self.lineplot is None:
+            # still initializing
+            return
+
+        ### axis lines
+        start = np.array(self.start, dtype=np.float32)
+        end = np.array(self.end, dtype=np.float32)
+        mag = np.linalg.norm(end - start)
+        norm_vec = (end-start)/mag
+        count = ceil(mag / (self.dash_len + self.space_len))
+        
+        pos = []
+        cur_pos = np.array(start)        
+        for _ in range(0,count+1):
+            pos.append(cur_pos)
+            next_pos = self.dash_len * norm_vec + cur_pos
+            if np.all(next_pos > end):
+                next_pos = end
+                pos.append(end)
+            else:
+                pos.append(next_pos)
+            cur_pos = self.space_len * norm_vec + next_pos
+
+        color = np.array(self.color, dtype=np.float32)
+        color = np.tile(color, len(pos)*2).reshape((-1, 4))   
+        pos = np.array(pos, dtype=np.float32).reshape((-1, 3))
+        
+        self.lineplot.setData(pos=pos, color=color)
+        
+        #####
+        self.update()

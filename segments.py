@@ -32,16 +32,17 @@ class Part1(Segment):
         # theres apparently a bug in pyqtgraph
         # that depth value is working like in earlier versions
         # move the vector slightly off the origin for better drawing
-        w.e_vec = myVectorItem(parentItem=w.axes,
+        w.e_vec = MyVectorItem(parentItem=w.axes,
                                color=[1,0,0,1],
                                start=[0.0,0.0,0.05],
-                               end=[5.0,0.0,0.05])
+                               end=[w.magnitude,0.0,0.05])
         w.e_vec.setDepthValue(5)
 
 
         # hide z-axis
         w.z_label.setVisible(False)
-        w.axes.setData(z_visible=False)
+        w.axes.setData(z_visible=False,
+                       x_tick_plane=1)
         
         # disable previous button
         w.prev_button.setEnabled(False)
@@ -54,13 +55,14 @@ class Part1(Segment):
 
         # undo invisibility changes
         w.z_label.setVisible(True)
-        w.axes.setData(z_visible=True)
+        w.axes.setData(z_visible=True,
+                       x_tick_plane=2)
         
         # re-enable previous button
         w.prev_button.setEnabled(True)
         
     def updateScene(self, w, t):
-        x = 3.0 * np.cos(w.freq*t)
+        x = w.magnitude * np.cos(w.freq*t)
         
         w.e_vec.setPosition(start=[0.0,0.0,0.05],
                             end=[x,0.0,0.05])
@@ -79,10 +81,10 @@ class Part2(Segment):
         # theres apparently a bug in pyqtgraph
         # that depth value is working like in earlier versions
         # move the vector slightly off the origin for better drawing
-        w.e_vec = myVectorItem(parentItem=w.axes,
+        w.e_vec = MyVectorItem(parentItem=w.axes,
                                color=[1,0,0,1],
                                start=[0.0,0.0,0.05],
-                               end=[5.0,0.0,0.05])
+                               end=[w.magnitude,0.0,0.05])
         w.e_vec.setDepthValue(5)
 
 
@@ -93,7 +95,7 @@ class Part2(Segment):
         w.e_vec = None
         
     def updateScene(self, w, t):
-        x = 3.0 * np.cos(w.freq*t)
+        x = w.magnitude * np.cos(w.freq*t)
         
         w.e_vec.setPosition(start=[0.0,0.0,0.05],
                             end=[x,0.0,0.05])
@@ -112,6 +114,63 @@ class Part2(Segment):
         
             w.canvas.setCameraPosition(elevation=elevation,
                                        azimuth=azimuth)
+
+
+class Part3(Segment):
+    def __init__(self):
+        super().__init__(3)
+    
+    def setupScene(self, w):        
+        w.setWindowTitle("EM Polarization - Part 3")
+
+        w.canvas.setCameraPosition(distance=10,
+                                   elevation=10,
+                                   azimuth=110)
+
+        # e vector
+        w.e_vec = MyVectorItem(parentItem=w.axes,
+                               color=[1,0,0,1],
+                               start=[0.0,0.0,0.0],
+                               end=[w.magnitude,0.0,0.0])
+        w.e_vec.setDepthValue(5)
+
+
+        # observer
+        w.observer = MyGLImageItem(parentItem=w.axes,
+                                   pos=[0.0, w.axes.y_min, 0.0],
+                                   image='latex/eye_side.png',
+                                   height=30)
+        
+
+        # dashed line
+        w.ob_line = MyDashedLineItem(parentItem=w.axes,
+                                     start=[0.0, w.axes.y_max, 0.0],
+                                     end=[0.0, w.axes.y_min, 0.0])
+        w.ob_line.setDepthValue(4)
+
+        
+
+    def tearDownScene(self, w):
+        # remove e_vec from scene
+        w.e_vec.setParentItem(None)
+        w.canvas.removeItem(w.e_vec)
+        w.e_vec = None
+        
+    def updateScene(self, w, t):
+        duration = 8.0
+        z = linear_scale(x2=w.axes.z_max,
+                         y2=duration,
+                         y=t)
+        
+        w.e_vec.setPosition(start=[0.0,0.0,z],
+                            end=[w.magnitude,0.0,z])
+        w.observer.setData(pos=[0.0, w.axes.y_max, z-0.35])
+        w.ob_line.setData(start=[0.0,w.axes.y_max,z],
+                          end=[0.0,w.axes.y_min,z])
+
+        if t>duration:
+            w.restartAnimation()
+
 
 
 
