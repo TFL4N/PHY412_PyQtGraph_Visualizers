@@ -45,6 +45,10 @@ class BaseWidget(QWidget):
         self.next_part_button = None
         self.prev_chapter_button = None
         self.next_chapter_button = None
+        self.pause_button = None
+        self.right_circ_button = None
+        self.left_circ_button = None
+        
         self.freq_label = None
         self.phase_diff_label = None
         self.phase_diff_slider = None
@@ -84,6 +88,7 @@ class BaseWidget(QWidget):
 
         w = QPushButton("Pause Animation")
         w.clicked.connect(self.handlePauseAnimationPress)
+        self.pause_button = w
         opts_layout.addWidget(w, 2, 1)
 
         
@@ -115,6 +120,17 @@ class BaseWidget(QWidget):
         opts_layout.addWidget(l, 4, 0)
         opts_layout.addWidget(w, 4, 1)
 
+        w = QPushButton("Right Circular")
+        w.clicked.connect(self.handleRightCircularPress)
+        self.right_circ_button = w
+        opts_layout.addWidget(w, 5, 0)
+
+        w = QPushButton("Left Circular")
+        w.clicked.connect(self.handleLeftCircularPress)
+        self.left_circ_button = w
+        opts_layout.addWidget(w, 5, 1)
+
+        
         # Super user controls
         if False:
             l = QLabel("Save Image")
@@ -122,8 +138,8 @@ class BaseWidget(QWidget):
             w = QPushButton("Capture")
             w.clicked.connect(self.handleSaveImagePress)
             
-            opts_layout.addWidget(l, 5, 0)
-            opts_layout.addWidget(w, 5, 1)
+            opts_layout.addWidget(l, 6, 0)
+            opts_layout.addWidget(w, 6, 1)
         
 
             l = QLabel("Debug Action")
@@ -131,8 +147,8 @@ class BaseWidget(QWidget):
             w = QPushButton("Action")
             w.clicked.connect(self.handleDebugActionPress)
             
-            opts_layout.addWidget(l, 6, 0)
-            opts_layout.addWidget(w, 6, 1)
+            opts_layout.addWidget(l, 7, 0)
+            opts_layout.addWidget(w, 7, 1)
 
         
         ### main layout
@@ -161,7 +177,7 @@ class BaseWidget(QWidget):
         self.axes = MyGLAxisItem(x_min=-3, x_max=3,
                                  y_min=-3, y_max=3,
                                  z_min=-3, z_max=3,
-                                 glOptions='opaque')
+                                 glOptions='translucent')
         self.axes.rotate(-90,0,1,0)
         self.canvas.addItem(self.axes)
 
@@ -185,7 +201,7 @@ class BaseWidget(QWidget):
         new_seg = self.segment.segment_num + 1
         new_chapter = self.chapter
         if new_seg > 6:
-            new_seg = (new_seg % 6) + 1
+            new_seg = new_seg % 6
             new_chapter += 1
         self.transitionTo(new_seg, new_chapter)
 
@@ -224,13 +240,18 @@ class BaseWidget(QWidget):
         if self.chapter == 3:
             self.phase_diff_label.setHidden(False)
             self.phase_diff_slider.setHidden(False)
+            self.right_circ_button.setHidden(False)
+            self.left_circ_button.setHidden(False)
         else:
             self.phase_diff_label.setHidden(True)
             self.phase_diff_slider.setHidden(True)
+            self.right_circ_button.setHidden(True)
+            self.left_circ_button.setHidden(True)
             self.phase_diff_int = 0
             self.phase_diff = 0.0
             self.updatePhaseDiffLabel()
-        
+            self.phase_diff_slider.setValue(0)
+            
         # load next segment class
         _module = __import__('segments')
         _class = None
@@ -262,12 +283,24 @@ class BaseWidget(QWidget):
     def restartAnimation(self):
         self.stopAnimating()
         self.startAnimating()
+
+    def togglePauseAnimation(self):
+        if self.timer is None:
+            return
+
+        if self.timer.is_running():
+            self.timer.stop_timer()
+            self.pause_button.setText('Resume Animation')
+        else:
+            self.timer.start_timer()
+            self.pause_button.setText('Pause Animation')
         
     def startAnimating(self):
         self.stopAnimating()
 
         self.timer = MyTimer(block=self.updateScene)
         self.timer.start_timer()
+        self.pause_button.setText('Pause Animation')
 
     def stopAnimating(self):
         if self.timer is not None:
@@ -293,7 +326,7 @@ class BaseWidget(QWidget):
         self.restartAnimation()
 
     def handlePauseAnimationPress(self, state):
-        self.pauseAnimation()
+        self.togglePauseAnimation()
 
     def handleFreqChange(self, val):
         self.freq = linear_scale(x1=0.5,
@@ -310,6 +343,14 @@ class BaseWidget(QWidget):
         self.restartAnimation()
         self.updatePhaseDiffLabel()
 
+    def handleRightCircularPress(self, state):
+        self.handlePhaseChange(-2)
+        self.phase_diff_slider.setValue(-2)
+        
+    def handleLeftCircularPress(self, state):
+        self.handlePhaseChange(2)
+        self.phase_diff_slider.setValue(2)
+        
     def handleSaveImagePress(self, state):
         self.canvas.grabFramebuffer().save('images/fileName.png')
     

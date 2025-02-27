@@ -17,17 +17,23 @@ class MyTimer(QtCore.QObject):
         self.interval = interval
         self.block = block
         self.counter = 0.0
+        self.__is_running = False
         
         self.timer = QtCore.QTimer()
         self.timer.setInterval(self.interval)
         self.timer.timeout.connect(self.on_timeout)
         
     def start_timer(self):
+        self.__is_running = True
         self.timer.start()
 
     def stop_timer(self):
+        self.__is_running = False
         self.timer.stop()
 
+    def is_running(self):
+        return self.__is_running
+        
     def on_timeout(self):
         if self.duration is not None \
            and self.counter >= self.duration:

@@ -3,6 +3,14 @@ from my_widgets import *
 import numpy as np
 import pyqtgraph.opengl as gl
 
+class Settings:
+    @staticmethod
+    def graphStep():
+        '''When generating graphs, the distance between consectutive data points
+
+        For example, the electric field, this would adjust dz
+        '''
+        return 0.05
 
 class Segment(ABC):
     def __init__(self, segment_number):
@@ -17,8 +25,6 @@ class Segment(ABC):
     def updateScene(self, w, t):
         pass
     
-    
-        
 class Part1(Segment):
     def __init__(self):
         super().__init__(1)
@@ -243,7 +249,7 @@ class Part4(Segment):
         
     def updateScene(self, w, t):
         # graph
-        zs = np.arange(0,w.axes.z_max+0.1,0.1)
+        zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
@@ -289,10 +295,10 @@ class Part4(Segment):
                         new_up_vecs.append(vec)
                         
                     # mod vector
-                    x = w.magnitude
+                    x = w.magnitude * np.cos(w.freq*cur_z - w.freq*t)
                     y = 0.0
                     if w.chapter > 1:
-                        y = w.magnitude 
+                        y = w.magnitude * np.cos(w.freq*cur_z - w.freq*t + w.phase_diff)
                     
                     vec.setVisible(True)
                     vec.setPosition(start=[0.0,0.0,cur_z],
@@ -333,10 +339,10 @@ class Part4(Segment):
                         new_down_vecs.append(vec)
                         
                     # mod vector
-                    x = -w.magnitude
+                    x = w.magnitude * np.cos(w.freq*cur_z - w.freq*t)
                     y = 0.0
                     if w.chapter > 1:
-                        y = -w.magnitude 
+                        y = w.magnitude * np.cos(w.freq*cur_z - w.freq*t + w.phase_diff)
                     
                     vec.setVisible(True)
                     vec.setPosition(start=[0.0,0.0,cur_z],
@@ -421,6 +427,7 @@ class Part5(Segment):
                                          width=3.0,
                                          antialias=True,
                                          mode='line_strip')
+        self.e_graph.setDepthValue(5)
 
         
 
@@ -460,7 +467,7 @@ class Part5(Segment):
         elif t <= pt_1_dur + pt_2_dur:
             # part 2
             # show e graph
-            zs = np.arange(0,w.axes.z_max+0.1,0.1)
+            zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2])
@@ -489,7 +496,7 @@ class Part5(Segment):
 
 
             # e_graph
-            zs = np.arange(0,w.axes.z_max+0.1,0.1)
+            zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
@@ -536,6 +543,7 @@ class Part6(Segment):
                                          width=3.0,
                                          antialias=True,
                                          mode='line_strip')
+        self.e_graph.setDepthValue(5)
 
         # b graph
         self.b_graph = gl.GLLinePlotItem(parentItem=w.axes,
@@ -544,7 +552,7 @@ class Part6(Segment):
                                          width=3.0,
                                          antialias=True,
                                          mode='line_strip')
-
+        self.b_graph.setDepthValue(4)
         
 
     def tearDownScene(self, w):
@@ -586,7 +594,7 @@ class Part6(Segment):
             
             
         # e_graph
-        zs = np.arange(0,w.axes.z_max+0.1,0.1)
+        zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
@@ -615,7 +623,7 @@ class Part6(Segment):
             
             
         # b_graph
-        zs = np.arange(0,w.axes.z_max+0.1,0.1)
+        zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
         data = np.zeros((zs.size,3))
         
         x = w.magnitude * np.cos(w.freq*zs - w.freq*t)
