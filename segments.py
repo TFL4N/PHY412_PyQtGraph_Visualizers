@@ -45,9 +45,6 @@ class Part1(Segment):
         w.axes.setData(z_visible=False,
                        x_tick_plane=1)
         
-        # disable previous button
-        w.prev_button.setEnabled(False)
-
     def tearDownScene(self, w):
         # remove e_vec from scene
         self.e_vec.setParentItem(None)
@@ -58,14 +55,11 @@ class Part1(Segment):
         w.z_label.setVisible(True)
         w.axes.setData(z_visible=True,
                        x_tick_plane=2)
-        
-        # re-enable previous button
-        w.prev_button.setEnabled(True)
-        
+                
     def updateScene(self, w, t):
         x = w.magnitude * np.cos(w.freq*t)
         y = 0.0
-        if w.chapter == 2:
+        if w.chapter > 1:
             y = w.magnitude * np.cos(w.freq*t + w.phase_diff)
         
         self.e_vec.setPosition(start=[0.0,0.0,0.05],
@@ -100,7 +94,7 @@ class Part2(Segment):
     def updateScene(self, w, t):
         x = w.magnitude * np.cos(w.freq*t)
         y = 0.0
-        if w.chapter == 2:
+        if w.chapter > 1:
             y = w.magnitude * np.cos(w.freq*t + w.phase_diff)
 
         
@@ -178,7 +172,7 @@ class Part3(Segment):
                          y=t)
         x = w.magnitude
         y = 0.0
-        if w.chapter == 2:
+        if w.chapter > 1:
             y = w.magnitude
         
         self.e_vec.setPosition(start=[0.0,0.0,z],
@@ -253,7 +247,7 @@ class Part4(Segment):
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
-        if w.chapter == 2:
+        if w.chapter > 1:
             data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t + w.phase_diff)
            
         self.graph.setData(pos=data)
@@ -297,7 +291,7 @@ class Part4(Segment):
                     # mod vector
                     x = w.magnitude
                     y = 0.0
-                    if w.chapter == 2:
+                    if w.chapter > 1:
                         y = w.magnitude 
                     
                     vec.setVisible(True)
@@ -341,7 +335,7 @@ class Part4(Segment):
                     # mod vector
                     x = -w.magnitude
                     y = 0.0
-                    if w.chapter == 2:
+                    if w.chapter > 1:
                         y = -w.magnitude 
                     
                     vec.setVisible(True)
@@ -457,7 +451,7 @@ class Part5(Segment):
                 z = self.dz*(idx+1)
                 x = w.magnitude * np.cos(w.freq*z)
                 y = 0.0
-                if w.chapter == 2:
+                if w.chapter > 1:
                     y = w.magnitude * np.cos(w.freq*z + w.phase_diff)
 
                 vec.setPosition(start=[0.0,0.0,z],
@@ -470,7 +464,7 @@ class Part5(Segment):
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2])
-            if w.chapter == 2:
+            if w.chapter > 1:
                 data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] + w.phase_diff)
 
             
@@ -487,7 +481,7 @@ class Part5(Segment):
                 z = z % w.axes.z_max
                 x = w.magnitude * np.cos(w.freq*z - w.freq*t)
                 y = 0.0
-                if w.chapter == 2:
+                if w.chapter > 1:
                     y = w.magnitude * np.cos(w.freq*z - w.freq*t + w.phase_diff)
 
                 vec.setPosition(start=[0.0,0.0,z],
@@ -499,7 +493,7 @@ class Part5(Segment):
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
-            if w.chapter == 2:
+            if w.chapter > 1:
                 data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t + w.phase_diff)
 
 
@@ -584,7 +578,7 @@ class Part6(Segment):
             z = z % w.axes.z_max
             x = w.magnitude * np.cos(w.freq*z - w.freq*t)
             y = 0.0
-            if w.chapter == 2:
+            if w.chapter > 1:
                 y = w.magnitude * np.cos(w.freq*z - w.freq*t + w.phase_diff)
 
             vec.setPosition(start=[0.0,0.0,z],
@@ -596,7 +590,7 @@ class Part6(Segment):
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
-        if w.chapter == 2:
+        if w.chapter > 1:
             data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t + w.phase_diff)
 
         
@@ -608,7 +602,7 @@ class Part6(Segment):
             z = z % w.axes.z_max
             x = w.magnitude * np.cos(w.freq*z - w.freq*t)
             y = 0.0
-            if w.chapter == 2:
+            if w.chapter > 1:
                 y = w.magnitude * np.cos(w.freq*z - w.freq*t + w.phase_diff)
 
             # rotate by 90 degrees
@@ -626,7 +620,7 @@ class Part6(Segment):
         
         x = w.magnitude * np.cos(w.freq*zs - w.freq*t)
         y = np.zeros(zs.size)
-        if w.chapter == 2:
+        if w.chapter > 1:
             y = w.magnitude * np.cos(w.freq*zs - w.freq*t + w.phase_diff)
         
         # rotate by 90 degrees

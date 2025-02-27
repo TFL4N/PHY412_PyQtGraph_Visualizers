@@ -39,46 +39,57 @@ class BaseWidget(QWidget):
         self.magnitude = 3.0
         self.freq = 0.5
         self.phase_diff = 0.0
+        self.phase_diff_int = 0
 
-        self.prev_button = None
-        self.next_button = None
+        self.prev_part_button = None
+        self.next_part_button = None
+        self.prev_chapter_button = None
+        self.next_chapter_button = None
+        self.freq_label = None
+        self.phase_diff_label = None
+        self.phase_diff_slider = None
 
-        self.chapter = start_chapter
+        self.chapter = None
         self.segment = None
         
         # menu options
         opts_layout = QGridLayout()
+        opts_layout.setColumnStretch(0,1)
+        opts_layout.setColumnStretch(1,1)
 
-        l = QLabel("Previous Step")
-
-        w = QPushButton("Previous")
-        w.clicked.connect(self.handlePreviousPress)
-        self.prev_button = w
+        w = QPushButton("Previous Part")
+        w.clicked.connect(self.handlePreviousPartPress)
+        self.prev_part_button = w
         
-        opts_layout.addWidget(l, 0, 0)
+        opts_layout.addWidget(w, 0, 0)
+
+        w = QPushButton("Next Part")
+        w.clicked.connect(self.handleNextPartPress)
+        self.next_part_button = w
         opts_layout.addWidget(w, 0, 1)
 
+        w = QPushButton("Previous Chapter")
+        w.clicked.connect(self.handlePreviousChapterPress)
+        self.prev_chapter_button = w
+        opts_layout.addWidget(w, 1, 0)
 
-        l = QLabel("Next Step")
-
-        w = QPushButton("Next")
-        w.clicked.connect(self.handleNextPress)
-        self.next_button = w
-        
-        opts_layout.addWidget(l, 1, 0)
+        w = QPushButton("Next Chapter")
+        w.clicked.connect(self.handleNextChapterPress)
+        self.next_chapter_button = w
         opts_layout.addWidget(w, 1, 1)
 
-
-        l = QLabel("Restart Animation")
-
-        w = QPushButton("Restart")
+        w = QPushButton("Restart Animation")
         w.clicked.connect(self.handleRestartAnimationPress)
+        opts_layout.addWidget(w, 2, 0)
 
-        opts_layout.addWidget(l, 2, 0)
+        w = QPushButton("Pause Animation")
+        w.clicked.connect(self.handlePauseAnimationPress)
         opts_layout.addWidget(w, 2, 1)
 
         
         l = QLabel("Frequency")
+        self.freq_label = l
+        self.updateFreqLabel()
 
         w = QSlider(Qt.Horizontal)
         w.setValue(0)
@@ -91,33 +102,37 @@ class BaseWidget(QWidget):
 
 
         l = QLabel("Relative Phase")
-
+        self.phase_diff_label = l
+        self.updatePhaseDiffLabel()
+        
         w = QSlider(Qt.Horizontal)
         w.setValue(0)
-        w.setMinimum(0)
-        w.setMaximum(1000)
+        w.setMinimum(-2)
+        w.setMaximum(2)
         w.valueChanged.connect(self.handlePhaseChange)
-
+        self.phase_diff_slider = w
+        
         opts_layout.addWidget(l, 4, 0)
         opts_layout.addWidget(w, 4, 1)
 
         # Super user controls
-        l = QLabel("Save Image")
+        if False:
+            l = QLabel("Save Image")
+            
+            w = QPushButton("Capture")
+            w.clicked.connect(self.handleSaveImagePress)
+            
+            opts_layout.addWidget(l, 5, 0)
+            opts_layout.addWidget(w, 5, 1)
+        
 
-        w = QPushButton("Capture")
-        w.clicked.connect(self.handleSaveImagePress)
-
-        opts_layout.addWidget(l, 5, 0)
-        opts_layout.addWidget(w, 5, 1)
-
-
-        l = QLabel("Debug Action")
-
-        w = QPushButton("Action")
-        w.clicked.connect(self.handleDebugActionPress)
-
-        opts_layout.addWidget(l, 6, 0)
-        opts_layout.addWidget(w, 6, 1)
+            l = QLabel("Debug Action")
+            
+            w = QPushButton("Action")
+            w.clicked.connect(self.handleDebugActionPress)
+            
+            opts_layout.addWidget(l, 6, 0)
+            opts_layout.addWidget(w, 6, 1)
 
         
         ### main layout
@@ -129,7 +144,7 @@ class BaseWidget(QWidget):
         
         # start
         self.setupScene()
-        self.transitionTo(start_segment)
+        self.transitionTo(start_segment, start_chapter)
         
     def setupScene(self):
         self.buildAxes()
@@ -166,20 +181,55 @@ class BaseWidget(QWidget):
     #
     # Transitions
     #
-    def transitionToNext(self):
+    def transitionToNextPart(self):
         new_seg = self.segment.segment_num + 1
-        self.transitionTo(new_seg)
+        new_chapter = self.chapter
+        if new_seg > 6:
+            new_seg = (new_seg % 6) + 1
+            new_chapter += 1
+        self.transitionTo(new_seg, new_chapter)
 
-    def transitionToPrev(self):
+    def transitionToPrevPart(self):
         new_seg = self.segment.segment_num - 1
-        self.transitionTo(new_seg)
+        new_chapter = self.chapter
+        if new_seg < 1:
+            new_seg = 6
+            new_chapter -= 1
+        self.transitionTo(new_seg, new_chapter)
     
-    def transitionTo(self, segment_num):
+    def transitionToNextChapter(self):
+        self.transitionTo(self.segment.segment_num,
+                          self.chapter + 1)
+
+    def transitionToPrevChapter(self):
+        self.transitionTo(self.segment.segment_num,
+                          self.chapter - 1)
+    
+    def transitionTo(self, segment_num, chapter_num):
         # destroy old scene
         self.stopAnimating()
         if not self.segment is None:
             self.segment.tearDownScene(self)
             self.segment = None
+
+        # chapter updates
+        self.chapter = chapter_num
+
+        self.next_chapter_button.setDisabled(not (self.chapter < 3))
+        self.prev_chapter_button.setDisabled(not (self.chapter > 1))
+
+        self.next_part_button.setDisabled(self.chapter == 3 and segment_num == 6)
+        self.prev_part_button.setDisabled(self.chapter == 1 and segment_num == 1)
+        
+        if self.chapter == 3:
+            self.phase_diff_label.setHidden(False)
+            self.phase_diff_slider.setHidden(False)
+        else:
+            self.phase_diff_label.setHidden(True)
+            self.phase_diff_slider.setHidden(True)
+            self.phase_diff_int = 0
+            self.phase_diff = 0.0
+            self.updatePhaseDiffLabel()
         
         # load next segment class
         _module = __import__('segments')
@@ -227,14 +277,23 @@ class BaseWidget(QWidget):
     #
     # Button Handlers
     #
-    def handlePreviousPress(self, state):
-        self.transitionToPrev()
+    def handlePreviousPartPress(self, state):
+        self.transitionToPrevPart()
 
-    def handleNextPress(self, state):
-        self.transitionToNext()
+    def handleNextPartPress(self, state):
+        self.transitionToNextPart()
+
+    def handlePreviousChapterPress(self, state):
+        self.transitionToPrevChapter()
+
+    def handleNextChapterPress(self, state):
+        self.transitionToNextChapter()
     
     def handleRestartAnimationPress(self, state):
         self.restartAnimation()
+
+    def handlePauseAnimationPress(self, state):
+        self.pauseAnimation()
 
     def handleFreqChange(self, val):
         self.freq = linear_scale(x1=0.5,
@@ -242,9 +301,14 @@ class BaseWidget(QWidget):
                                  y2=1000,
                                  y=val)
         self.restartAnimation()
+        self.updateFreqLabel()
 
     def handlePhaseChange(self, val):
-        pass
+        self.phase_diff_int = val
+        self.phase_diff = val * np.pi / 4
+        
+        self.restartAnimation()
+        self.updatePhaseDiffLabel()
 
     def handleSaveImagePress(self, state):
         self.canvas.grabFramebuffer().save('images/fileName.png')
@@ -253,6 +317,19 @@ class BaseWidget(QWidget):
         print(self.canvas.cameraPosition())
         print(self.canvas.opts)
 
+    #
+    # Utils
+    #
+    def updateFreqLabel(self):
+        self.freq_label.setText(f'Frequency\n{self.freq}')
+
+    def updatePhaseDiffLabel(self):
+        if self.phase_diff_int == 0:
+            self.phase_diff_label.setText("Relative Phase\n0")
+        else:
+            denom = int(np.abs(4 / self.phase_diff_int))
+            sign = '' if self.phase_diff_int > 0 else '-'
+            self.phase_diff_label.setText(f"Relative Phase\n{sign}\u03c0/{denom}")
 
         
 ## build a QApplication before building other widgets
