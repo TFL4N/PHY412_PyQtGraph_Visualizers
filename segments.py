@@ -24,7 +24,7 @@ class Part1(Segment):
         super().__init__(1)
     
     def setupScene(self, w):        
-        w.setWindowTitle("EM Polarization - Part 1")
+        w.setWindowTitle(f"EM Polarization - Chapter {w.chapter} - Part 1")
 
         w.canvas.setCameraPosition(distance=10,
                                    elevation=0,
@@ -64,16 +64,19 @@ class Part1(Segment):
         
     def updateScene(self, w, t):
         x = w.magnitude * np.cos(w.freq*t)
+        y = 0.0
+        if w.chapter == 2:
+            y = w.magnitude * np.cos(w.freq*t + w.phase_diff)
         
         self.e_vec.setPosition(start=[0.0,0.0,0.05],
-                               end=[x,0.0,0.05])
+                               end=[x,y,0.05])
 
 class Part2(Segment):
     def __init__(self):
         super().__init__(2)
     
     def setupScene(self, w):        
-        w.setWindowTitle("EM Polarization - Part 2")
+        w.setWindowTitle(f"EM Polarization - Chapter {w.chapter} - Part 2")
 
         w.canvas.setCameraPosition(distance=10,
                                    elevation=0,
@@ -96,9 +99,13 @@ class Part2(Segment):
         
     def updateScene(self, w, t):
         x = w.magnitude * np.cos(w.freq*t)
+        y = 0.0
+        if w.chapter == 2:
+            y = w.magnitude * np.cos(w.freq*t + w.phase_diff)
+
         
         self.e_vec.setPosition(start=[0.0,0.0,0.05],
-                               end=[x,0.0,0.05])
+                               end=[x,y,0.05])
 
         # move camera
         duration = 5.0
@@ -121,7 +128,7 @@ class Part3(Segment):
         super().__init__(3)
     
     def setupScene(self, w):        
-        w.setWindowTitle("EM Polarization - Part 3")
+        w.setWindowTitle(f"EM Polarization - Chapter {w.chapter} - Part 3")
 
         w.canvas.setCameraPosition(distance=10,
                                    elevation=10,
@@ -169,9 +176,13 @@ class Part3(Segment):
         z = linear_scale(x2=w.axes.z_max,
                          y2=duration,
                          y=t)
+        x = w.magnitude
+        y = 0.0
+        if w.chapter == 2:
+            y = w.magnitude
         
         self.e_vec.setPosition(start=[0.0,0.0,z],
-                               end=[w.magnitude,0.0,z])
+                               end=[x,y,z])
         self.observer.setData(pos=[0.0, w.axes.y_max, z-0.35])
         self.ob_line.setData(start=[0.0,w.axes.y_max,z],
                              end=[0.0,w.axes.y_min,z])
@@ -185,7 +196,7 @@ class Part4(Segment):
         super().__init__(4)
     
     def setupScene(self, w):        
-        w.setWindowTitle("EM Polarization - Part 4")
+        w.setWindowTitle(f"EM Polarization - Chapter {w.chapter} - Part 4")
 
         w.canvas.setCameraPosition(distance=10,
                                    elevation=10,
@@ -242,7 +253,9 @@ class Part4(Segment):
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
-
+        if w.chapter == 2:
+            data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t + w.phase_diff)
+           
         self.graph.setData(pos=data)
 
         # find first minumim
@@ -282,9 +295,14 @@ class Part4(Segment):
                         new_up_vecs.append(vec)
                         
                     # mod vector
+                    x = w.magnitude
+                    y = 0.0
+                    if w.chapter == 2:
+                        y = w.magnitude 
+                    
                     vec.setVisible(True)
                     vec.setPosition(start=[0.0,0.0,cur_z],
-                                    end=[w.magnitude,0.0,cur_z])
+                                    end=[x,y,cur_z])
 
                     # get plane
                     plane = None
@@ -321,9 +339,14 @@ class Part4(Segment):
                         new_down_vecs.append(vec)
                         
                     # mod vector
+                    x = -w.magnitude
+                    y = 0.0
+                    if w.chapter == 2:
+                        y = -w.magnitude 
+                    
                     vec.setVisible(True)
                     vec.setPosition(start=[0.0,0.0,cur_z],
-                                    end=[-w.magnitude,0.0,cur_z])
+                                    end=[x,y,cur_z])
                     
                     # get plane
                     plane = None
@@ -380,7 +403,7 @@ class Part5(Segment):
         super().__init__(5)
     
     def setupScene(self, w):        
-        w.setWindowTitle("EM Polarization - Part 5")
+        w.setWindowTitle(f"EM Polarization - Chapter {w.chapter} - Part 5")
 
         w.canvas.setCameraPosition(distance=10,
                                    elevation=10,
@@ -433,9 +456,12 @@ class Part5(Segment):
             for idx, vec in enumerate(self.e_vecs):
                 z = self.dz*(idx+1)
                 x = w.magnitude * np.cos(w.freq*z)
+                y = 0.0
+                if w.chapter == 2:
+                    y = w.magnitude * np.cos(w.freq*z + w.phase_diff)
 
                 vec.setPosition(start=[0.0,0.0,z],
-                                end=[x,0.0,z])
+                                end=[x,y,z])
                 vec.setVisible(idx*dt < t)
         elif t <= pt_1_dur + pt_2_dur:
             # part 2
@@ -444,6 +470,9 @@ class Part5(Segment):
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2])
+            if w.chapter == 2:
+                data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] + w.phase_diff)
+
             
             self.e_graph.setData(pos=data)
             self.e_graph.setVisible(True)
@@ -457,9 +486,12 @@ class Part5(Segment):
                 z = self.dz*(idx+1) + t
                 z = z % w.axes.z_max
                 x = w.magnitude * np.cos(w.freq*z - w.freq*t)
+                y = 0.0
+                if w.chapter == 2:
+                    y = w.magnitude * np.cos(w.freq*z - w.freq*t + w.phase_diff)
 
                 vec.setPosition(start=[0.0,0.0,z],
-                                end=[x,0.0,z])
+                                end=[x,y,z])
 
 
             # e_graph
@@ -467,6 +499,9 @@ class Part5(Segment):
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
+            if w.chapter == 2:
+                data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t + w.phase_diff)
+
 
             self.e_graph.setData(pos=data)
 
@@ -475,7 +510,7 @@ class Part6(Segment):
         super().__init__(6)
     
     def setupScene(self, w):        
-        w.setWindowTitle("EM Polarization - Part 6")
+        w.setWindowTitle(f"EM Polarization - Chapter {w.chapter} - Part 6")
 
         w.canvas.setCameraPosition(distance=10,
                                    elevation=10,
@@ -548,9 +583,12 @@ class Part6(Segment):
             z = self.dz*(idx+1) + t
             z = z % w.axes.z_max
             x = w.magnitude * np.cos(w.freq*z - w.freq*t)
-            
+            y = 0.0
+            if w.chapter == 2:
+                y = w.magnitude * np.cos(w.freq*z - w.freq*t + w.phase_diff)
+
             vec.setPosition(start=[0.0,0.0,z],
-                            end=[x,0.0,z])
+                            end=[x,y,z])
             
             
         # e_graph
@@ -558,6 +596,9 @@ class Part6(Segment):
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
+        if w.chapter == 2:
+            data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t + w.phase_diff)
+
         
         self.e_graph.setData(pos=data)
 
@@ -565,16 +606,36 @@ class Part6(Segment):
         for idx, vec in enumerate(self.b_vecs):
             z = self.dz*(idx+1) + t
             z = z % w.axes.z_max
-            y = w.magnitude * np.cos(w.freq*z - w.freq*t)
-            
+            x = w.magnitude * np.cos(w.freq*z - w.freq*t)
+            y = 0.0
+            if w.chapter == 2:
+                y = w.magnitude * np.cos(w.freq*z - w.freq*t + w.phase_diff)
+
+            # rotate by 90 degrees
+            temp = x
+            x = -y
+            y = temp
+                
             vec.setPosition(start=[0.0,0.0,z],
-                            end=[0.0,y,z])
+                            end=[x,y,z])
             
             
         # b_graph
         zs = np.arange(0,w.axes.z_max+0.1,0.1)
         data = np.zeros((zs.size,3))
-        data[:,2] = zs
-        data[:,1] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
         
+        x = w.magnitude * np.cos(w.freq*zs - w.freq*t)
+        y = np.zeros(zs.size)
+        if w.chapter == 2:
+            y = w.magnitude * np.cos(w.freq*zs - w.freq*t + w.phase_diff)
+        
+        # rotate by 90 degrees
+        temp = x
+        x = -y
+        y = temp
+
+        data[:,0] = x 
+        data[:,1] = y
+        data[:,2] = zs
+                
         self.b_graph.setData(pos=data)

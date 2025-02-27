@@ -23,7 +23,7 @@ from pyqtgraph.Qt.QtWidgets import (
 
         
 class BaseWidget(QWidget):
-    def __init__(self, start_segment=1):
+    def __init__(self, start_segment=1, start_chapter=1):
         super().__init__()
 
         self.setWindowTitle("EM Polarization")
@@ -43,6 +43,7 @@ class BaseWidget(QWidget):
         self.prev_button = None
         self.next_button = None
 
+        self.chapter = start_chapter
         self.segment = None
         
         # menu options
@@ -89,7 +90,7 @@ class BaseWidget(QWidget):
         opts_layout.addWidget(w, 3, 1)
 
 
-        l = QLabel("Phase")
+        l = QLabel("Relative Phase")
 
         w = QSlider(Qt.Horizontal)
         w.setValue(0)
