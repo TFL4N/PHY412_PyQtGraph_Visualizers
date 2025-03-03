@@ -8,6 +8,9 @@ import pyqtgraph.opengl as gl
 from pyqtgraph.Qt.QtCore import (
     Qt
     )
+from pyqtgraph.Qt.QtGui import (
+    QDoubleValidator
+    )
 from pyqtgraph.Qt.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -16,14 +19,108 @@ from pyqtgraph.Qt.QtWidgets import (
     QVBoxLayout,
     QGridLayout,
     QLabel,
+    QLineEdit,
     QSlider,
     QCheckBox,
     QPushButton
     )
 
+################
+# local code
+import os
+here = os.path.dirname(__file__)
+#sys.path.append(os.path.abspath(os.path.join(here, '../reborn/reborn/gui/misc')))
+sys.path.append('/Users/SpaiceMaine/ASU/Projects/kirian/reborn/reborn/gui/misc/')
+
+from observer import Observable
+###############
+
+
+
+class AxesSettingsLayout(QGridLayout):
+    def __init__(self):
+        super().__init__()
+
+        self.setColumnStretch(0,1)
+        self.setColumnStretch(1,1)
+
+        self.user_changes_observable = Observable()
+        
+        _,self.x_min_box = self._buildLimitComponents('X Min', 0)
+        _,self.x_max_box = self._buildLimitComponents('X Max', 1)
+        _,self.y_min_box = self._buildLimitComponents('Y Min', 2)
+        _,self.y_max_box = self._buildLimitComponents('Y Max', 3)
+        _,self.z_min_box = self._buildLimitComponents('Z Min', 4)
+        _,self.z_max_box = self._buildLimitComponents('Z Max', 5)
+        
+        
+    def _buildLimitComponents(self, label, row):
+        l = QLabel(label)
+        
+        w = QLineEdit()
+        w.textEdited.connect(self._onUserDidEdit)
+        w.setValidator(QDoubleValidator())
+        
+        self.addWidget(l, row, 0)
+        self.addWidget(w, row, 1)
+
+        return (l,w)
+
+    def _onUserDidEdit(self):
+        def add_value(d, key, text):
+            val = None
+            try:
+                val = float(text)
+            except:
+                return
+
+            d[key] = val
+
+
+        data = {}
+        add_value(data, 'x_min', self.x_min_box.text())
+        add_value(data, 'x_max', self.x_max_box.text())
+        add_value(data, 'y_min', self.y_min_box.text())
+        add_value(data, 'y_max', self.y_max_box.text())
+        add_value(data, 'z_min', self.z_min_box.text())
+        add_value(data, 'z_max', self.z_max_box.text())
+            
+        self.user_changes_observable.notify_observers(user_data=data)
+    
+    def updateAxesSettingsUI(self, x_min, x_max,
+                            y_min, y_max,
+                            z_min, z_max):
+        self.x_min_box.setText(str(x_min))
+        self.x_max_box.setText(str(x_max))
+        self.y_min_box.setText(str(y_min))
+        self.y_max_box.setText(str(y_max))
+        self.z_min_box.setText(str(z_min))
+        self.z_max_box.setText(str(z_max))
+
+
+class SceneSettingsWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle('SceneSettings')
+        self.axes_layout = AxesSettingsLayout()
+        
+        
+        ### main layout
+        main_layout = QVBoxLayout()
+
+        l = QLabel('Axes Settings')
+        main_layout.addWidget(l)
+        
+        main_layout.addLayout(self.axes_layout)
+        
+        self.setLayout(main_layout)
+
+        
+
         
 class BaseWidget(QWidget):
-    def __init__(self, start_segment=1, start_chapter=1):
+    def __init__(self, start_segment=1, start_chapter=1, user_mode=0):
         super().__init__()
 
         self.setWindowTitle("EM Polarization")
@@ -55,6 +152,9 @@ class BaseWidget(QWidget):
 
         self.chapter = None
         self.segment = None
+
+        # windows
+        self.scene_settings_widget = None
         
         # menu options
         opts_layout = QGridLayout()
@@ -132,23 +232,32 @@ class BaseWidget(QWidget):
 
         
         # Super user controls
-        if False:
-            l = QLabel("Save Image")
+        if user_mode == 0:
+            l = QLabel("Scene Settings")
             
-            w = QPushButton("Capture")
-            w.clicked.connect(self.handleSaveImagePress)
+            w = QPushButton("Show Scene Settings")
+            w.clicked.connect(self.handleShowSceneSettingsPress)
             
             opts_layout.addWidget(l, 6, 0)
             opts_layout.addWidget(w, 6, 1)
-        
 
-            l = QLabel("Debug Action")
             
-            w = QPushButton("Action")
-            w.clicked.connect(self.handleDebugActionPress)
+            # l = QLabel("Save Image")
             
-            opts_layout.addWidget(l, 7, 0)
-            opts_layout.addWidget(w, 7, 1)
+            # w = QPushButton("Capture")
+            # w.clicked.connect(self.handleSaveImagePress)
+            
+            # opts_layout.addWidget(l, 6, 0)
+            # opts_layout.addWidget(w, 6, 1)
+
+            
+            # l = QLabel("Debug Action")
+            
+            # w = QPushButton("Action")
+            # w.clicked.connect(self.handleDebugActionPress)
+            
+            # opts_layout.addWidget(l, 7, 0)
+            # opts_layout.addWidget(w, 7, 1)
 
         
         ### main layout
@@ -306,7 +415,28 @@ class BaseWidget(QWidget):
         if self.timer is not None:
             self.timer.stop_timer()
             self.timer = None
-        
+
+    #
+    # Window Handlers
+    #
+    def showSceneSettings(self):
+        # check if need to alloc new window
+        if self.scene_settings_widget is None:
+            self.scene_settings_widget = SceneSettingsWidget()
+            self.scene_settings_widget.axes_layout.user_changes_observable.register_observer(self.handleAxesSettingsChange)
+
+        self.scene_settings_widget.axes_layout.updateAxesSettingsUI(
+            self.axes.x_min, self.axes.x_max,
+            self.axes.y_min, self.axes.y_max,
+            self.axes.z_min, self.axes.z_max
+        )
+        self.scene_settings_widget.show()
+
+    def handleAxesSettingsChange(self, observable, user_data):
+        #print(f"New axes settings: {user_data}")
+        self.axes.setData(**user_data)
+        self.restartAnimation()
+            
     #
     # Button Handlers
     #
@@ -350,6 +480,9 @@ class BaseWidget(QWidget):
     def handleLeftCircularPress(self, state):
         self.handlePhaseChange(2)
         self.phase_diff_slider.setValue(2)
+
+    def handleShowSceneSettingsPress(self, state):
+        self.showSceneSettings()
         
     def handleSaveImagePress(self, state):
         self.canvas.grabFramebuffer().save('images/fileName.png')
