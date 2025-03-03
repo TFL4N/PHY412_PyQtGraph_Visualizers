@@ -47,7 +47,6 @@ class Part1(Segment):
 
 
         # hide z-axis
-        w.z_label.setVisible(False)
         w.axes.setData(z_visible=False,
                        x_tick_plane=1)
         
@@ -58,7 +57,6 @@ class Part1(Segment):
         self.e_vec = None
 
         # undo invisibility changes
-        w.z_label.setVisible(True)
         w.axes.setData(z_visible=True,
                        x_tick_plane=2)
                 

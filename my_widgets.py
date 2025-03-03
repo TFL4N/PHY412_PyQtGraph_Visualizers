@@ -98,7 +98,7 @@ class MyVectorItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.end = np.array(end)
         self.width = width
         self.tip_height = 0.3
-        self.tip_radius = 0.25
+        self.tip_radius = 0.15
         self.color = color
 
         
@@ -163,6 +163,10 @@ class MyGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.y_major_plot = None
         self.z_major_plot = None
 
+        self.x_label = None
+        self.y_label = None
+        self.z_label = None
+
         self.x_min = -5.0
         self.x_max = 5.0
         self.x_step = 1.0
@@ -209,6 +213,54 @@ class MyGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
         self.setParentItem(parentItem)
         self.updateLines()
 
+    def setXLabel(self, label):
+        # remove old
+        # TODO prolly need to remove from gl.view also
+        if not self.x_label is None:
+            self.x_label.setParentItem(None)
+            self.x_label = None
+
+        # check is get removing label
+        if label is None:
+            return
+        
+        # add new label
+        label.setParentItem(self)
+        self.x_label = label
+        self.updateLabels()
+        
+    def setYLabel(self, label):
+        # remove old
+        # TODO prolly need to remove from gl.view also
+        if not self.y_label is None:
+            self.y_label.setParentItem(None)
+            self.y_label = None
+
+        # check is get removing label
+        if label is None:
+            return
+        
+        # add new label
+        label.setParentItem(self)
+        self.y_label = label
+        self.updateLabels()
+        
+    def setZLabel(self, label):
+        # remove old
+        # TODO prolly need to remove from gl.view also
+        if not self.z_label is None:
+            self.z_label.setParentItem(None)
+            self.z_label = None
+
+        # check is get removing label
+        if label is None:
+            return
+        
+        # add new label
+        label.setParentItem(self)
+        self.z_label = label
+        self.updateLabels()
+        
     def setData(self, **kwds):
         args = ['x_min', 'x_max', 'x_step', 'x_tick_plane',
                 'y_min', 'y_max', 'y_step', 'y_tick_plane',
@@ -300,7 +352,20 @@ class MyGLAxisItem(gl.GLGraphicsItem.GLGraphicsItem):
 
         
         #####
+        self.updateLabels()
         self.update()
+
+    def updateLabels(self):
+        pad=0.25
+        if not self.x_label is None:
+            self.x_label.setData(pos=[self.x_max+pad, 0.0, 0.0])
+            self.x_label.setVisible(self.x_visible)
+        if not self.y_label is None:
+            self.y_label.setData(pos=[0.0, self.y_max+pad, 0.0])
+            self.y_label.setVisible(self.y_visible)
+        if not self.z_label is None:
+            self.z_label.setData(pos=[0.0, 0.0, self.z_max+pad])
+            self.z_label.setVisible(self.z_visible)
 
 # Inspiration: https://github.com/pyqtgraph/pyqtgraph/blob/master/pyqtgraph/opengl/items/GLTextItem.py
 class MyGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
@@ -357,7 +422,8 @@ class MyGLImageItem(gl.GLGraphicsItem.GLGraphicsItem):
 
 
     def paint(self):
-        if self.image is None:
+        if self.image is None \
+           or self.view() is None:
             return
 
         # load image from file if needed

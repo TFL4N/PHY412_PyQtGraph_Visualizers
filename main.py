@@ -288,21 +288,27 @@ class BaseWidget(QWidget):
                                  z_min=-3, z_max=3,
                                  glOptions='translucent')
         self.axes.rotate(-90,0,1,0)
-        self.canvas.addItem(self.axes)
 
-        pad = 0.25
-        self.x_label = MyGLImageItem(parentItem=self.axes,
-                                     pos=[self.axes.x_max+pad,0.0,0.0],
-                                     image='latex/hat_e_1.png',
-                                     height=30)
-        self.y_label = MyGLImageItem(parentItem=self.axes,
-                                     pos=[0.0,self.axes.y_max+pad,0.0],
-                                     image='latex/hat_e_2.png',
-                                     height=30)
-        self.z_label = MyGLImageItem(parentItem=self.axes,
-                                     pos=[0.0,0.0,self.axes.z_max+pad],
-                                     image='latex/hat_k.png',
-                                     height=30)
+        # TODO this needs to be called before adding labels
+        # should be able to add labels before adding axes to view
+        self.canvas.addItem(self.axes)
+        
+        # labels
+        l = MyGLImageItem(image='latex/hat_e_1.png',
+                          height=30)
+        self.axes.setXLabel(l)
+        
+        l = MyGLImageItem(image='latex/hat_e_2.png',
+                          height=30)
+        self.axes.setYLabel(l)
+
+        l = MyGLImageItem(image='latex/hat_k.png',
+                          height=30)
+        self.axes.setZLabel(l)
+
+        
+
+        
     #
     # Transitions
     #
