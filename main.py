@@ -1,15 +1,19 @@
 import sys
 
+from observer import Observable
 from my_widgets import *
 import numpy as np
+from enum import IntEnum
 
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from pyqtgraph.Qt.QtCore import (
-    Qt
+    Qt,
+    QUrl
     )
 from pyqtgraph.Qt.QtGui import (
-    QDoubleValidator
+    QDoubleValidator,
+    QDesktopServices
     )
 from pyqtgraph.Qt.QtWidgets import (
     QApplication,
@@ -24,17 +28,6 @@ from pyqtgraph.Qt.QtWidgets import (
     QCheckBox,
     QPushButton
     )
-
-################
-# local code
-import os
-here = os.path.dirname(__file__)
-#sys.path.append(os.path.abspath(os.path.join(here, '../reborn/reborn/gui/misc')))
-sys.path.append('/Users/SpaiceMaine/ASU/Projects/kirian/reborn/reborn/gui/misc/')
-
-from observer import Observable
-###############
-
 
 
 class AxesSettingsLayout(QGridLayout):
@@ -102,7 +95,7 @@ class SceneSettingsWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle('SceneSettings')
+        self.setWindowTitle('Scene Settings')
         self.axes_layout = AxesSettingsLayout()
         
         
@@ -117,10 +110,19 @@ class SceneSettingsWidget(QWidget):
         self.setLayout(main_layout)
 
         
-
+class UserMode(IntEnum):
+    SUPER_USER = 0
+    SIMULATION = 1
+    EXPLAINER = 2
         
 class BaseWidget(QWidget):
-    def __init__(self, start_segment=1, start_chapter=1, user_mode=0):
+    def __init__(self, start_segment=1, start_chapter=1, user_mode=UserMode.EXPLAINER):
+        '''
+        User modes:
+          0 = Super user, shows all options of all users plus debugging
+          1 = Simulation Only, only shows the options for simulation
+          2 = Explainer Mode, shows the simulation and the explainer
+        '''
         super().__init__()
 
         self.setWindowTitle("EM Polarization")
@@ -230,16 +232,26 @@ class BaseWidget(QWidget):
         self.left_circ_button = w
         opts_layout.addWidget(w, 5, 1)
 
+        # Explainer User
+        if user_mode == UserMode.EXPLAINER:
+            l = QLabel("Show Explainer")
+            
+            w = QPushButton("Show Explainer")
+            w.clicked.connect(self.handleShowExplainerPress)
+            
+            opts_layout.addWidget(l, 6, 0)
+            opts_layout.addWidget(w, 6, 1)
+
         
         # Super user controls
-        if user_mode == 0:
+        if user_mode == UserMode.SUPER_USER:
             l = QLabel("Scene Settings")
             
             w = QPushButton("Show Scene Settings")
             w.clicked.connect(self.handleShowSceneSettingsPress)
             
-            opts_layout.addWidget(l, 6, 0)
-            opts_layout.addWidget(w, 6, 1)
+            opts_layout.addWidget(l, 7, 0)
+            opts_layout.addWidget(w, 7, 1)
 
             
             # l = QLabel("Save Image")
@@ -294,15 +306,15 @@ class BaseWidget(QWidget):
         self.canvas.addItem(self.axes)
         
         # labels
-        l = MyGLImageItem(image='latex/hat_e_1.png',
+        l = MyGLImageItem(image='resources/hat_e_1.png',
                           height=30)
         self.axes.setXLabel(l)
         
-        l = MyGLImageItem(image='latex/hat_e_2.png',
+        l = MyGLImageItem(image='resources/hat_e_2.png',
                           height=30)
         self.axes.setYLabel(l)
 
-        l = MyGLImageItem(image='latex/hat_k.png',
+        l = MyGLImageItem(image='resources/hat_k.png',
                           height=30)
         self.axes.setZLabel(l)
 
@@ -442,7 +454,7 @@ class BaseWidget(QWidget):
         #print(f"New axes settings: {user_data}")
         self.axes.setData(**user_data)
         self.restartAnimation()
-            
+
     #
     # Button Handlers
     #
@@ -487,6 +499,10 @@ class BaseWidget(QWidget):
         self.handlePhaseChange(2)
         self.phase_diff_slider.setValue(2)
 
+    def handleShowExplainerPress(self, state):
+        url = QUrl.fromLocalFile("resources/explainer_slides.pdf")
+        QDesktopServices.openUrl(url)
+
     def handleShowSceneSettingsPress(self, state):
         self.showSceneSettings()
         
@@ -511,12 +527,14 @@ class BaseWidget(QWidget):
             sign = '' if self.phase_diff_int > 0 else '-'
             self.phase_diff_label.setText(f"Relative Phase\n{sign}\u03c0/{denom}")
 
-        
+
+##
 ## build a QApplication before building other widgets
-app = pg.mkQApp()
+##
+if __name__ == "__main__":
+    app = pg.mkQApp()
 
-w = BaseWidget()
-w.show()
+    w = BaseWidget()
+    w.show()
 
-
-sys.exit(app.exec())  # Start the Qt event loop. This is crucial for the GUI to function.
+    sys.exit(app.exec())  # Start the Qt event loop
