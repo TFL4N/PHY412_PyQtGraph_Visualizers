@@ -8,7 +8,7 @@ The version of the electromagentic wave plane visualizer is interactive, i.e. th
 
 In addition, this project includes step-by-step explainer of the simulations, which is located here [Explainer Slides](resources/explainer_slides.pdf).  These explainer slides can also be accessed from the GUI while using the `EXPLAINER` or `SUPER_USER` user modes.
 
-![Gif of Polarization](docs/simulation_example.gif)
+![Gif of Polarization](docs/em_example.gif)
 
 ## Installation
 
