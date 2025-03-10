@@ -143,7 +143,7 @@ class Part3(Segment):
         # observer
         self.observer = MyGLImageItem(parentItem=w.axes,
                                       pos=[0.0, w.axes.y_min, 0.0],
-                                      image='latex/eye_side.png',
+                                      image='resources/eye_side.png',
                                       height=30)
         
 

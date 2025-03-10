@@ -1,4 +1,4 @@
-name: opengl_viz
+name: em_viz
 channels:
   - conda-forge
 dependencies:

@@ -233,7 +233,8 @@ class BaseWidget(QWidget):
         opts_layout.addWidget(w, 5, 1)
 
         # Explainer User
-        if user_mode == UserMode.EXPLAINER:
+        if user_mode == UserMode.EXPLAINER \
+           or user_mode == UserMode.SUPER_USER:
             l = QLabel("Show Explainer")
             
             w = QPushButton("Show Explainer")
@@ -532,9 +533,38 @@ class BaseWidget(QWidget):
 ## build a QApplication before building other widgets
 ##
 if __name__ == "__main__":
+    import argparse
+
+    # get cmd line args
+    parser = argparse.ArgumentParser(description="An interactive simulation electromagnetic plane wave polarization with explainer slides")
+    parser.add_argument(
+        "-u", "--user-mode",
+        type=int,
+        default=UserMode.EXPLAINER,
+        help="User Mode (default: EXPLAINER)\nSUPER_USER==0\nSIMULATION==1\nEXPLAINER==2"
+    )
+    parser.add_argument(
+        "-p", "--start-part",
+        type=int,
+        default=1,
+        help="The part that the simulation start at"
+    )
+    parser.add_argument(
+        "-c", "--start-chapter",
+        type=int,
+        default=1,
+        help="The chapter that the simulation start at"
+    )
+    args = parser.parse_args()
+    
+    # run app
     app = pg.mkQApp()
 
-    w = BaseWidget()
+    w = BaseWidget(
+        start_segment=args.start_part,
+        start_chapter=args.start_chapter,
+        user_mode=args.user_mode
+    )
     w.show()
 
     sys.exit(app.exec())  # Start the Qt event loop
