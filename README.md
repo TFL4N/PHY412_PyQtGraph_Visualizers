@@ -29,8 +29,21 @@ First follow the installation directions above to clone the repo and setup the p
 # if conda envir not active
 conda activate em_viz
 
+# default
 cd /path/to/install/dir
 python main.py
+
+# advanced: see options below
+# Example: Simulation Only user mode, starting at part 4 chapter 3
+python main.py -u 1 -p 4 -c 3
+```
+
+### Selecting a Part or Chapter
+The simulation is broken down into parts and chapter.  Parts build intuition and work to explain the full simulation.  Chapters contain the same parts, but explore different EM plane wave, e.g. linear vs elliptical polarization
+
+```shell
+# start at part 4 chapter 3
+python main.py -p 4 -c 3
 ```
 
 ### User Modes
@@ -53,6 +66,11 @@ python main.py -u 1
 
 # EXPLAINER mode
 python main.py -u 2
+```
+### How display command line help
+Using the `-h` will display the command line arguments usage
+```shell
+python main.py -h
 ```
 
 ## Developer
