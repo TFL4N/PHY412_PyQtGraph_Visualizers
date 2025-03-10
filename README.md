@@ -41,6 +41,10 @@ python main.py -u 1 -p 4 -c 3
 ### Selecting a Part or Chapter
 The simulation is broken down into parts and chapter.  Parts build intuition and work to explain the full simulation.  Chapters contain the same parts, but explore different EM plane wave, e.g. linear vs elliptical polarization
 
+- Chapter 1: A single linear polarized EM plane wave
+- Chapter 2: The superposition of EM plane waves with a relative difference of 0, i.e. linear polarization
+- Chapter 3: The superposition of EM plane waves with variable relative difference
+
 ```shell
 # start at part 4 chapter 3
 python main.py -p 4 -c 3
@@ -74,7 +78,13 @@ python main.py -h
 ```
 
 ## Developer
+### LaTex
 To display LaTex in the simulation, `matplotlib` is used to create images which are loaded into `MyGLImageItem` scene objects
 
 [latex2image.py](latex2image.py) contains the methods to create the images from a LaTex string
 [test/latex_test.py](test/latex_test.py) contains examples of how create these images
+
+### PyQtGraph Dependency
+This project uses PyQtGraph to manage drawing in OpenGL. 
+
+As of March 2025, this project currently relies on a specific commit of PyQtGraph (installed via pip). And I'm waiting for new changes in PyQtGraph to be include in their yearly release. Once this is the case, TODO, use this new release and drop pip requirement.  
