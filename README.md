@@ -39,11 +39,11 @@ python main.py -u 1 -p 4 -c 3
 ```
 
 ### Selecting a Part or Chapter
-The simulation is broken down into parts and chapter.  Parts build intuition and work to explain the full simulation.  Chapters contain the same parts, but explore different EM plane wave, e.g. linear vs elliptical polarization
+The simulation is broken down into parts and chapter.  Parts build intuition and work to explain the full simulation.  Chapters contain the same parts, but explore different EM plane waves, e.g. linear vs elliptical polarization
 
-- Chapter 1: A single linear polarized EM plane wave
-- Chapter 2: The superposition of EM plane waves with a relative difference of 0, i.e. linear polarization
-- Chapter 3: The superposition of EM plane waves with variable relative difference
+- Chapter 1: A single linearly polarized EM plane wave
+- Chapter 2: The superposition of two EM plane waves with a relative difference of 0, i.e. linear polarization
+- Chapter 3: The superposition of two EM plane waves with variable relative difference
 
 ```shell
 # start at part 4 chapter 3
