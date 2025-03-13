@@ -1,0 +1,329 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[margin=1in,letterpaper]{geometry} % decreases margins
+
+\title{Electromagnetic Plane Wave Polarization}
+\author{}
+%\author{Tim Flanagan}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Chapter 1: A single plane wave}
+\subsection{Part 1: 2-D view of projection in $xy$-plane}
+Starting with the complex wave equation:
+\begin{equation}
+    \vec{\widetilde{E}}\left(\vec{r},t\right) = \vec{\widetilde{E}}_0 \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)
+\end{equation}
+where $\vec{\widetilde{E}}_0$ is the complex amplitude, $\vec{k}$ is the wave vector, and $\omega$ is the angular frequency.  Let $\hat{\widetilde{E}}_0 = \hat{x}$,  the phase $\delta$ of $\hat{\widetilde{E}}_0$ equal $0$, and  $\hat{k} = \hat{z}$.  Note that this satisfies the condition that the electric field is perpendicular to the direction of propagation, i.e. $\hat{E} \cdot \hat{k} = 0$.  The plane wave is linearly polarized in the $\hat{x}$ direction and depends only on the $z$-component of $\vec r$, since $\vec{k} \cdot \vec{r} = kz$.
+\begin{align}
+     \vec{\widetilde{E}}\left(z,t\right) &= E_0 e^{i\delta} \exp \left(i kz - i \omega t\right) \hat{\widetilde{E}}_0\\
+     &= E_0 \exp \left(i kz - i \omega t\right) \hat{x}
+\end{align}
+Here we consider the electric field in the $xy$-plane, or $z=0$
+\begin{equation}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=0} = E_0 \exp \left(- i \omega t\right) \hat{x}
+\end{equation}
+What will the plot of the electric field in the $xy$-plane look like?
+
+\subsection{Part 2: 3-D view of projection in $xy$-plane}
+Here we consider the same electric field at $z=0$, but from a 3-D perspective
+
+\subsection{Part 3: An observer at light speed}
+Imagine observing a point on the plane wave at light speed.  What will the electric field look like from this perspective?
+
+Hint: An observer moving at light speed will have a moving coordinate of $z=ct$, where $c$ is the speed of light.  How is the speed of light related to the wave vector and the angular frequency?  What does the plane wave equation evaluate to by using the moving coordinate $z=ct$?
+
+\begin{align}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=ct} &= E_0 \exp \left(ikct- i \omega t\right) \hat{x}  \\
+     &= E_0 \exp \left(ik\frac{\omega}{k}t - i \omega t\right) \hat{x}  \\
+     &= E_0 \exp \left(i\omega t- i \omega t\right) \hat{x}  \\
+     &= E_0 \hat{x} 
+\end{align}
+What will the plot of the electric field look like as time is animated?  The blue dot represents the observer.
+
+\subsection{Part 4: Fixed $z$, arbitrary time}
+Consider the electric field for some fixed $z$, or $z=z_0$.  At some arbitrary time $t_0$, what is the electric field?  After time $dt$,  how far will the electric field move for this fixed $z_0$?  As the electric field at $z_0$ moves along the $z$-axis, does the electric field vary or remain constant?
+\begin{equation}
+    dz = c\;dt = \frac{\omega}{k}dt
+\end{equation}
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0,\;t=t_0} = E_0 \exp \left(ikz_0- i \omega t_0\right) \hat{x}
+\end{equation}
+\begin{align}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0+dz,\;t=t_0+dt} &= E_0 \exp \left(ik(z_0+dz)- i \omega (t_0+dt)\right) \hat{x}  \\
+     &= E_0 \exp \left(ikz_0+ik\;dz- i \omega t_0- i \omega\;dt\right) \hat{x}  \\
+     &= E_0 \exp \left(ikz_0+ik\frac{\omega}{k}dt- i \omega t_0- i \omega\;dt\right) \hat{x}  \\
+     &= E_0 \exp \left(ikz_0+i\omega\; dt- i \omega t_0- i \omega\;dt\right) \hat{x}  \\
+     &= E_0 \exp \left(ikz_0- i \omega t_0\right) \hat{x}  \\
+     &=\left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0,\;t=t_0}
+\end{align}
+
+This plot shows the planes $z=z_0$ where the electric field is at a minimum or a maximum.  From this plot, what is the wavelength?
+\subsection{Part 5: Fixed time, arbitrary $z$}
+Now consider the electric field at time $t=0$.  If the value of the electric field is sampled by varying $z$, what would the plot look like?
+
+The sampled values of the electric field are
+\begin{equation}
+    E_{\text{sample}} \in E_0 \exp \left(ikz\right) \hat{x} \;\delta_{z,n\,dz}
+\end{equation}
+where $dz$ is the sampling interval, $n \in \mathbb{Z}$, and $\delta_{i,j}$ is the Kronecker delta.
+
+First, the samples of the electric field are plotted
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=n\,dz,\;t=0} = E_0 \exp \left(ikn\,dz\right) \hat{x}
+\end{equation}
+Second, the electric field at time $t=0$ is plotted
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{t=0} = E_0 \exp \left(ikz\right) \hat{x}
+\end{equation}
+Finally, time is allowed to vary
+\begin{equation}
+    \vec{\widetilde{E}}\left(z,t\right) = E_0 \exp \left(i kz - i \omega t\right) \hat{x}
+\end{equation}
+\subsection{Part 6: Magnetic Field}
+If the plane wave is linearly polarized in the $\hat x$-direction, in which direction does the magnetic field point?
+\begin{equation}
+    \vec{\widetilde{B}}\left(z,t\right) =  \frac{k}{\omega} \left(\hat{k}\times\vec{\widetilde{E}}\right)
+\end{equation}
+Here is a plot of the electric and magnetic fields as time varies.
+
+
+
+
+\section{Chapter 2: Superposition with vanishing relative phase}
+Consider the superposition of two plane waves propagating in the same direction with the same amplitude, whose polarization components are perpendicular.  In other words,
+\begin{align}    
+    &\vec{\widetilde{E}}_0  = \vec{\widetilde{E}}_1 + \vec{\widetilde{E}}_2 \\
+    &\vec{\widetilde{E}}_1 \cdot \vec{\widetilde{E}}_2 = 0 \\ 
+    &\vec{\widetilde{E}}_1 \times \vec{\widetilde{E}}_2 = \vec{k} \\
+    &\left|\vec{\widetilde{E}}_1\right| = \left|\vec{\widetilde{E}}_2 \right|
+\end{align}
+Let's also assume that the plane waves are propagating in the same direction and have the same angular frequency:
+\begin{align}
+    &\vec{k} = \vec{k}_1 = \vec{k}_2 \\
+    &\vec{\widetilde{E}}_1 \cdot \vec{k} = \vec{\widetilde{E}}_2 \cdot \vec{k}  = 0 \\
+    &\omega = \omega_1 = \omega_2 
+\end{align}
+The complex amplitude $\vec{\widetilde{E}}_0$ can be expressed in terms the real components of the $\vec{\widetilde{E}}_1$ and $\vec{\widetilde{E}}_2$, the overall phase $\delta$, and the relative phase $\phi$.
+\begin{align}    
+    \vec{\widetilde{E}}_0  &= \vec{\widetilde{E}}_1 + \vec{\widetilde{E}}_2 \\
+    &= e^{i\delta}\left(\vec{E}_1 + \vec{E}_2 e^{i\phi}\right)
+\end{align}
+In this chapter, we will examine the case of linear polarization, i.e. $\phi=0$, and assume that $\delta=0$
+\begin{align}    
+    \vec{\widetilde{E}}_0  &= \vec{\widetilde{E}}_1 + \vec{\widetilde{E}}_2 \\
+    &= e^{0}\left(\vec{E}_1 + \vec{E}_2 e^{0}\right)\\
+    &= \vec{E}_1 + \vec{E}_2 \label{c2__e0_decomposed}
+\end{align}
+The field components become
+\begin{align}
+    \vec{\widetilde{E}}_1 \cdot  \vec{\widetilde{E}} &= E_1 \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right) \hat{\widetilde{E}}_1 \\
+    \vec{\widetilde{E}}_2 \cdot  \vec{\widetilde{E}} &= E_2 \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right) \hat{\widetilde{E}}_2 \\
+\end{align}
+
+\subsection{Part 1: 2-D view of projection in $xy$-plane}
+Starting with the complex wave equation:
+\begin{equation}
+    \vec{\widetilde{E}}\left(\vec{r},t\right) = \vec{\widetilde{E}}_0 \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)
+\end{equation}
+where $\vec{\widetilde{E}}_0$ is the complex amplitude, $\vec{k}$ is the wave vector, and $\omega$ is the angular frequency.  Using the decomposition expression \eqref{c2__e0_decomposed} we developed for $\vec{\widetilde{E}}_0$ above, the wave equation becomes
+
+\begin{equation}
+    \vec{\widetilde{E}}\left(\vec{r},t\right) = \left(\vec{E}_1 + \vec{E}_2\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)
+\end{equation}
+Without loss of generality, let $\hat{E}_1=\hat{x}$, $\hat{E}_2=\hat{y}$, and $\hat{k}=\hat{z}$.   The plane wave is linearly polarized in the $\hat{x}+\hat{y}$ direction and depends only on the $z$-component of $\vec r$, since $\vec{k} \cdot \vec{r} = kz$.
+\begin{align}
+     \vec{\widetilde{E}}\left(z,t\right) &= \left(\vec{E}_1 + \vec{E}_2\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(i kz - i \omega t\right) 
+\end{align}
+Here we consider the electric field in the $xy$-plane, or $z=0$
+\begin{equation}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=0} = \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(- i \omega t\right) 
+\end{equation}
+What will the plot of the electric field in the $xy$-plane look like?
+
+\subsection{Part 2: 3-D view of projection in $xy$-plane}
+Here we consider the same electric field at $z=0$, but from a 3-D perspective
+
+\subsection{Part 3: An observer at light speed}
+Imagine observing a point on the plane wave at light speed.  What will the electric field look like from this perspective?
+
+Hint: An observer moving at light speed will have a moving coordinate of $z=ct$, where $c$ is the speed of light.  How is the speed of light related to the wave vector and the angular frequency?  What does the plane wave equation evaluate to by using the moving coordinate $z=ct$?
+
+\begin{align}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=ct} &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikct- i \omega t\right)  \\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ik\frac{\omega}{k}t - i \omega t\right) \\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(i\omega t- i \omega t\right)   \\
+     &= E_1\hat{x} + E_2\hat{y} 
+\end{align}
+What will the plot of the electric field look like as time is animated?  The blue dot represents the observer.
+
+\subsection{Part 4: Fixed $z$, arbitrary time}
+Consider the electric field for some fixed $z$, or $z=z_0$.  At some arbitrary time $t_0$, what is the electric field?  After time $dt$,  how far will the electric field move for this fixed $z_0$?  As the electric field at $z_0$ moves along the $z$-axis, does the electric field vary or remain constant?
+\begin{equation}
+    dz = c\;dt = \frac{\omega}{k}dt
+\end{equation}
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0,\;t=t_0} = \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz_0- i \omega t_0\right)
+\end{equation}
+\begin{align}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0+dz,\;t=t_0+dt} &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ik(z_0+dz)- i \omega (t_0+dt)\right)   \\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz_0+ik\;dz- i \omega t_0- i \omega\;dt\right)   \\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz_0+ik\frac{\omega}{k}dt- i \omega t_0- i \omega\;dt\right)   \\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz_0+i\omega\; dt- i \omega t_0- i \omega\;dt\right)   \\
+     &= \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz_0- i \omega t_0\right)   \\
+     &=\left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0,\;t=t_0}
+\end{align}
+
+This plot shows the planes $z=z_0$ where the electric field is at a minimum or a maximum.  From this plot, what is the wavelength?
+\subsection{Part 5: Fixed time, arbitrary $z$}
+Now consider the electric field at time $t=0$.  If the value of the electric field is sampled by varying $z$, what would the plot look like?
+
+The sampled values of the electric field are
+\begin{equation}
+    E_{\text{sample}} \in \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz\right)   \;\delta_{z,n\,dz}
+\end{equation}
+where $dz$ is the sampling interval, $n \in \mathbb{Z}$, and $\delta_{i,j}$ is the Kronecker delta.
+
+First, the samples of the electric field are plotted
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=n\,dz,\;t=0} = \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikn\,dz\right) 
+\end{equation}
+Second, the electric field at time $t=0$ is plotted
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{t=0} = \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(ikz\right)
+\end{equation}
+Finally, time is allowed to vary
+\begin{equation}
+    \vec{\widetilde{E}}\left(z,t\right) = \left(E_1\hat{x} + E_2\hat{y}\right) \exp \left(i kz - i \omega t\right)
+\end{equation}
+\subsection{Part 6: Magnetic Field}
+If the plane wave is linearly polarized in the $\hat x$-direction, in which direction does the magnetic field point?
+\begin{equation}
+    \vec{\widetilde{B}}\left(z,t\right) =  \frac{k}{\omega} \left(\hat{k}\times\vec{\widetilde{E}}\right)
+\end{equation}
+Here is a plot of the electric and magnetic fields as time varies.
+
+\section{Chapter 3: Superposition with arbitrary relative phase}
+In this chapter we will again consider the case of the superposition of two plane waves propagating in the same direction with the same amplitude, whose polarization components are perpendicular.  But this time we will consider the more general case where the relative phase $\delta$ is arbitrary.  
+
+Following the developments in Chapter 2, we will express the complex amplitude $\vec{\widetilde{E}}_0$ can be expressed in terms the real components of the $\vec{\widetilde{E}}_1$ and $\vec{\widetilde{E}}_2$, the overall phase $\delta$, and the relative phase $\phi$.
+\begin{align}    
+    \vec{\widetilde{E}}_0  &= \vec{\widetilde{E}}_1 + \vec{\widetilde{E}}_2 \\
+    &= e^{i\delta}\left(\vec{E}_1 + \vec{E}_2 e^{i\phi}\right)
+\end{align}
+We will again assume that $\delta=0$
+\begin{align}    
+    \vec{\widetilde{E}}_0  &= \vec{\widetilde{E}}_1 + \vec{\widetilde{E}}_2 \\
+    &= e^{0}\left(\vec{E}_1 + \vec{E}_2 e^{i\phi}\right)\\
+    &= \vec{E}_1 + \vec{E}_2 e^{i\phi} \label{c3__e0_decomposed}
+\end{align}
+The field components become
+\begin{align}
+    \vec{\widetilde{E}}_1 \cdot  \vec{\widetilde{E}} &= E_1 \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right) \hat{\widetilde{E}}_1 \\
+    \vec{\widetilde{E}}_2 \cdot  \vec{\widetilde{E}} &= E_2 e^{i\phi}\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right) \hat{\widetilde{E}}_2 \\
+\end{align}
+For the special case where $\phi=-\pi/2$, we obtain right circular polarization.  Noting that the $y$-component is $-\pi/2$ radians out of phase with $x$-component, why is this special case considered circular polarization?  In which direction will the polarization vector rotate?  Clockwise or counter-clockwise?
+\begin{align}
+     \vec{\widetilde{E}}\left(\vec{r},t\right) &= \left(\vec{E}_1 + \vec{E}_2 e^{-i\pi/2}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\\
+     &= \left(E_1\hat{x} + E_2e^{-i\pi/2}\hat{y}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right) \\
+     &= E_1\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\hat{x} + E_2e^{-i\pi/2}\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\hat{y} \\
+     &= E_1\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\hat{x} + E_2\exp \left(i \vec{k} \cdot \vec{r} - i \omega t - i\frac{\pi}{2}\right)\hat{y}
+\end{align}
+For the special case where $\phi=\pi/2$, we obtain left circular polarization.  Noting that the $y$-component is $\pi/2$ radians out of phase with $x$-component, why is this special case considered circular polarization?  In which direction will the polarization vector rotate?  Clockwise or counter-clockwise?
+\begin{align}
+     \vec{\widetilde{E}}\left(\vec{r},t\right) &= \left(\vec{E}_1 + \vec{E}_2 e^{i\pi/2}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\\
+     &= \left(E_1\hat{x} + E_2e^{i\pi/2}\hat{y}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right) \\
+     &= E_1\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\hat{x} + E_2e^{i\pi/2}\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\hat{y} \\
+     &= E_1\exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\hat{x} + E_2\exp \left(i \vec{k} \cdot \vec{r} - i \omega t + i\frac{\pi}{2}\right)\hat{y}
+\end{align}
+\subsection{Part 1: 2-D view of projection in $xy$-plane}
+Starting with the complex wave equation:
+\begin{equation}
+    \vec{\widetilde{E}}\left(\vec{r},t\right) = \vec{\widetilde{E}}_0 \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)
+\end{equation}
+where $\vec{\widetilde{E}}_0$ is the complex amplitude, $\vec{k}$ is the wave vector, and $\omega$ is the angular frequency.  Using the decomposition expression \eqref{c3__e0_decomposed} we developed for $\vec{\widetilde{E}}_0$ above, the wave equation becomes
+
+\begin{equation}
+    \vec{\widetilde{E}}\left(\vec{r},t\right) = \left(\vec{E}_1 + \vec{E}_2e^{i\phi}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)
+\end{equation}
+Without loss of generality, let $\hat{E}_1=\hat{x}$, $\hat{E}_2=\hat{y}$, and $\hat{k}=\hat{z}$.   The plane wave is linearly polarized in the $\hat{x}+\hat{y}$ direction and depends only on the $z$-component of $\vec r$, since $\vec{k} \cdot \vec{r} = kz$.
+\begin{align}
+     \vec{\widetilde{E}}\left(z,t\right) &= \left(\vec{E}_1 + \vec{E}_2e^{i\phi}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(i \vec{k} \cdot \vec{r} - i \omega t\right)\\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(i kz - i \omega t\right) 
+\end{align}
+Here we consider the electric field in the $xy$-plane, or $z=0$
+\begin{equation}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=0} = \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(- i \omega t\right) 
+\end{equation}
+What will the plot of the electric field in the $xy$-plane look like?
+
+\subsection{Part 2: 3-D view of projection in $xy$-plane}
+Here we consider the same electric field at $z=0$, but from a 3-D perspective
+
+\subsection{Part 3: An observer at light speed}
+Imagine observing a point on the plane wave at light speed.  What will the electric field look like from this perspective?
+
+Hint: An observer moving at light speed will have a moving coordinate of $z=ct$, where $c$ is the speed of light.  How is the speed of light related to the wave vector and the angular frequency?  What does the plane wave equation evaluate to by using the moving coordinate $z=ct$?
+
+\begin{align}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=ct} &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikct- i \omega t\right)  \\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ik\frac{\omega}{k}t - i \omega t\right) \\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(i\omega t- i \omega t\right)   \\
+     &= E_1\hat{x} + E_2e^{i\phi}\hat{y} 
+\end{align}
+What will the plot of the electric field look like as time is animated?  The blue dot represents the observer.
+
+\subsection{Part 4: Fixed $z$, arbitrary time}
+Consider the electric field for some fixed $z$, or $z=z_0$.  At some arbitrary time $t_0$, what is the electric field?  After time $dt$,  how far will the electric field move for this fixed $z_0$?  As the electric field at $z_0$ moves along the $z$-axis, does the electric field vary or remain constant?
+\begin{equation}
+    dz = c\;dt = \frac{\omega}{k}dt
+\end{equation}
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0,\;t=t_0} = \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz_0- i \omega t_0\right)
+\end{equation}
+\begin{align}
+     \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0+dz,\;t=t_0+dt} &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ik(z_0+dz)- i \omega (t_0+dt)\right)   \\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz_0+ik\;dz- i \omega t_0- i \omega\;dt\right)   \\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz_0+ik\frac{\omega}{k}dt- i \omega t_0- i \omega\;dt\right)   \\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz_0+i\omega\; dt- i \omega t_0- i \omega\;dt\right)   \\
+     &= \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz_0- i \omega t_0\right)   \\
+     &=\left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=z_0,\;t=t_0}
+\end{align}
+
+This plot shows the planes $z=z_0$ where the electric field is at a minimum or a maximum.  From this plot, what is the wavelength?
+\subsection{Part 5: Fixed time, arbitrary $z$}
+Now consider the electric field at time $t=0$.  If the value of the electric field is sampled by varying $z$, what would the plot look like?
+
+The sampled values of the electric field are
+\begin{equation}
+    E_{\text{sample}} \in \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz\right)   \;\delta_{z,n\,dz}
+\end{equation}
+where $dz$ is the sampling interval, $n \in \mathbb{Z}$, and $\delta_{i,j}$ is the Kronecker delta.
+
+First, the samples of the electric field are plotted
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{z=n\,dz,\;t=0} = \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikn\,dz\right) 
+\end{equation}
+Second, the electric field at time $t=0$ is plotted
+\begin{equation}
+    \left.\vec{\widetilde{E}}\left(z,t\right)\right\rvert_{t=0} = \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(ikz\right)
+\end{equation}
+Finally, time is allowed to vary
+\begin{equation}
+    \vec{\widetilde{E}}\left(z,t\right) = \left(E_1\hat{x} + E_2e^{i\phi}\hat{y}\right) \exp \left(i kz - i \omega t\right)
+\end{equation}
+\subsection{Part 6: Magnetic Field}
+If the plane wave is linearly polarized in the $\hat x$-direction, in which direction does the magnetic field point?
+\begin{equation}
+    \vec{\widetilde{B}}\left(z,t\right) =  \frac{k}{\omega} \left(\hat{k}\times\vec{\widetilde{E}}\right)
+\end{equation}
+Here is a plot of the electric and magnetic fields as time varies.
+\end{document}
