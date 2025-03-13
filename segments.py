@@ -141,12 +141,16 @@ class Part3(Segment):
 
 
         # observer
-        self.observer = MyGLImageItem(parentItem=w.axes,
-                                      pos=[0.0, w.axes.y_min, 0.0],
-                                      image='resources/eye_side.png',
-                                      height=30)
+        point_md = gl.MeshData.sphere(10, 10, radius = 0.2)
+        self.observer = gl.GLMeshItem(
+                parentItem=w.axes,
+                meshdata=point_md,
+                color=[0.0,0.0,1.0,1.0],
+                smooth=False,
+                computeNormals=False,
+                glOptions='opaque'
+            )
         
-
         # dashed line
         self.ob_line = MyDashedLineItem(parentItem=w.axes,
                                         start=[0.0, w.axes.y_max, 0.0],
@@ -181,10 +185,13 @@ class Part3(Segment):
         
         self.e_vec.setPosition(start=[0.0,0.0,z],
                                end=[x,y,z])
-        self.observer.setData(pos=[0.0, w.axes.y_max, z-0.35])
         self.ob_line.setData(start=[0.0,w.axes.y_max,z],
                              end=[0.0,w.axes.y_min,z])
 
+        self.observer.resetTransform()
+        self.observer.translate(0.0, 0.0, z)
+
+        # loop animation
         if t>duration:
             w.restartAnimation()
 
