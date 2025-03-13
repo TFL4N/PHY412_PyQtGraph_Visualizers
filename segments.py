@@ -254,7 +254,7 @@ class Part4(Segment):
         
     def updateScene(self, w, t):
         # graph
-        zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
+        zs = np.arange(w.axes.z_min, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
@@ -264,8 +264,8 @@ class Part4(Segment):
         self.graph.setData(pos=data)
 
         # find first minumim
-        # this will be located at some z<=0
-        n = np.floor(w.freq / np.pi * (0.0 - t))
+        # this will be located at some z<=axes.z_min
+        n = np.floor(w.freq / np.pi * (w.axes.z_min - t))
         if n % 2 == 0:
             n -= 1
 
@@ -281,10 +281,14 @@ class Part4(Segment):
         down_plane_idx = -1
         new_up_planes = []
         new_down_planes = []
-        
+
+        # draw elements least n first
+        depth = 5
+
+        # loop through valid values of n
         while cur_z < w.axes.z_max:
             # check if in bounds of graph
-            if cur_z >= 0.0 and cur_z <= w.axes.z_max:
+            if cur_z >= w.axes.z_min and cur_z <= w.axes.z_max:
                 if n % 2 == 0:
                     # maximum
                     up_vec_idx += 1
@@ -308,6 +312,7 @@ class Part4(Segment):
                     vec.setVisible(True)
                     vec.setPosition(start=[0.0,0.0,cur_z],
                                     end=[x,y,cur_z])
+                    vec.setDepthValue(depth+1)
 
                     # get plane
                     plane = None
@@ -327,7 +332,7 @@ class Part4(Segment):
                                 0 - w.axes.y_min,
                                 1)
                     plane.translate(w.axes.x_min, w.axes.y_min, cur_z)
-
+                    plane.setDepthValue(depth)
                     
                 else:
                     # minimum
@@ -352,6 +357,7 @@ class Part4(Segment):
                     vec.setVisible(True)
                     vec.setPosition(start=[0.0,0.0,cur_z],
                                     end=[x,y,cur_z])
+                    vec.setDepthValue(depth+1)
                     
                     # get plane
                     plane = None
@@ -371,12 +377,13 @@ class Part4(Segment):
                                 0 - w.axes.y_min,
                                 1)
                     plane.translate(w.axes.x_min, w.axes.y_min, cur_z)
-
+                    plane.setDepthValue(depth)
 
                     
             # loop condition        
             n += 1
             cur_z = np.pi*n/w.freq + t
+            depth += 2
 
         #
         # update vector and plane cache
@@ -417,7 +424,7 @@ class Part5(Segment):
 
         self.e_vecs = []
         self.dz = 0.25
-        count = int(np.floor(w.axes.z_max/self.dz))
+        count = int(np.floor((w.axes.z_max-w.axes.z_min)/self.dz))
         for _ in range(0,count):
             vec = MyVectorItem(parentItem=w.axes,
                                color=[1,0,0,1],
@@ -460,7 +467,7 @@ class Part5(Segment):
 
             dt = pt_1_dur / len(self.e_vecs)
             for idx, vec in enumerate(self.e_vecs):
-                z = self.dz*(idx+1)
+                z = self.dz*(idx+1) + w.axes.z_min
                 x = w.magnitude * np.cos(w.freq*z)
                 y = 0.0
                 if w.chapter > 1:
@@ -472,7 +479,7 @@ class Part5(Segment):
         elif t <= pt_1_dur + pt_2_dur:
             # part 2
             # show e graph
-            zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
+            zs = np.arange(w.axes.z_min, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2])
@@ -489,8 +496,11 @@ class Part5(Segment):
 
             # vecs
             for idx, vec in enumerate(self.e_vecs):
+                # z = n*dz+ct (c=1) then confine to visible z-axis
                 z = self.dz*(idx+1) + t
-                z = z % w.axes.z_max
+                z = z % (w.axes.z_max - w.axes.z_min)
+                z += w.axes.z_min
+                
                 x = w.magnitude * np.cos(w.freq*z - w.freq*t)
                 y = 0.0
                 if w.chapter > 1:
@@ -501,7 +511,7 @@ class Part5(Segment):
 
 
             # e_graph
-            zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
+            zs = np.arange(w.axes.z_min, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
             data = np.zeros((zs.size,3))
             data[:,2] = zs
             data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
@@ -526,7 +536,7 @@ class Part6(Segment):
         self.e_vecs = []
         self.b_vecs = []
         self.dz = 0.25
-        count = int(np.floor(w.axes.z_max/self.dz))
+        count = int(np.floor((w.axes.z_max-w.axes.z_min)/self.dz))
         for _ in range(0,count):
             vec = MyVectorItem(parentItem=w.axes,
                                color=[1,0,0,1],
@@ -587,8 +597,11 @@ class Part6(Segment):
     def updateScene(self, w, t):
         # e vecs
         for idx, vec in enumerate(self.e_vecs):
+            # z = n*dz+ct (c=1) then confine to visible z-axis
             z = self.dz*(idx+1) + t
-            z = z % w.axes.z_max
+            z = z % (w.axes.z_max - w.axes.z_min)
+            z += w.axes.z_min
+
             x = w.magnitude * np.cos(w.freq*z - w.freq*t)
             y = 0.0
             if w.chapter > 1:
@@ -599,7 +612,7 @@ class Part6(Segment):
             
             
         # e_graph
-        zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
+        zs = np.arange(w.axes.z_min, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
         data = np.zeros((zs.size,3))
         data[:,2] = zs
         data[:,0] = w.magnitude * np.cos(w.freq*data[:,2] - w.freq*t)
@@ -611,8 +624,11 @@ class Part6(Segment):
 
         # b vecs
         for idx, vec in enumerate(self.b_vecs):
+            # z = n*dz+ct (c=1) then confine to visible z-axis
             z = self.dz*(idx+1) + t
-            z = z % w.axes.z_max
+            z = z % (w.axes.z_max - w.axes.z_min)
+            z += w.axes.z_min
+
             x = w.magnitude * np.cos(w.freq*z - w.freq*t)
             y = 0.0
             if w.chapter > 1:
@@ -628,7 +644,7 @@ class Part6(Segment):
             
             
         # b_graph
-        zs = np.arange(0, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
+        zs = np.arange(w.axes.z_min, w.axes.z_max+Settings.graphStep(), Settings.graphStep())
         data = np.zeros((zs.size,3))
         
         x = w.magnitude * np.cos(w.freq*zs - w.freq*t)
