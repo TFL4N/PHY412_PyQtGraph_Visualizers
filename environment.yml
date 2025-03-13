@@ -8,4 +8,4 @@ dependencies:
   - matplotlib
   - pip
   - pip:
-    - git+https://github.com/pyqtgraph/pyqtgraph.git
+    - git+https://github.com/pyqtgraph/pyqtgraph.git@3ed45751d77cff7c260bf29940950abb6411ed0c
