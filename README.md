@@ -16,7 +16,7 @@ This repo uses `conda` to make the python environment and dependencies
 
 ```shell
 cd /path/to/install/dir
-git clone git@github.com:TFL4N/PHY412_PyQtGraph_Visualizers.git
+git clone https://github.com/TFL4N/PHY412_PyQtGraph_Visualizers.git
 
 conda env create --file environment.yml
 conda activate em_viz
